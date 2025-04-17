@@ -3,6 +3,7 @@ def get_every_nth_word(words : list, n: int):
         yield word
 
 def print_text_before_solve(func):
+
     def wrapper(*args, **kwargs):
         print("Before solving the task:")
         print("Text:", args[0])

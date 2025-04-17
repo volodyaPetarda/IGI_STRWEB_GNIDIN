@@ -6,6 +6,7 @@ def solve():
     '''
     string = input_str("Введите строку: ")
     answer = len(string) - string.count(" ")
+    ' '.join(['s1', 's2', 's3'])
     print(f"Количество символов, отличных от пробельных: {answer}")
 
 if __name__ == '__main__':
