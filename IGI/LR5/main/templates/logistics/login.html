@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Вход в систему</title>
+
+</head>
+<body>
+    <div>
+        <h1>Вход в систему</h1>
+
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li{% if message.tags %} {% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if form.errors %}
+            <ul>
+                <li>Пожалуйста, введите правильные имя пользователя и пароль.</li>
+                 <li>Учтите, что оба поля могут быть чувствительны к регистру.</li>
+            </ul>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                <div>
+                    <label for="{{ form.username.id_for_label }}">Имя пользователя:</label>
+                    {{ form.username }}
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label for="{{ form.password.id_for_label }}">Пароль:</label>
+                    {{ form.password }}
+                </div>
+            </div>
+            <button type="submit">Войти</button>
+        </form>
+        <p><a href="{% url 'home_page' %}">Вернуться на главную</a></p>
+        <p>Нет аккаунта?
+            <a href="{% url 'register_client' %}">Регистрация клиента</a> |
+            <a href="{% url 'register_driver' %}">Регистрация водителя</a> |
+            <a href="{% url 'register_organization' %}">Регистрация организации</a>
+        </p>
+
+
+    </div>
+</body>
+</html>

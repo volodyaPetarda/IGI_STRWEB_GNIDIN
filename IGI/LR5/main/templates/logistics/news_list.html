@@ -1,0 +1,94 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+{% load tz %}
+
+{% block title %}{{ title }} - ВезёмВсё{% endblock %}
+
+{% block content %}
+<div>
+    <h1>{{ title }}</h1>
+
+    {% if page_obj.object_list %}
+        {% for news_item in page_obj.object_list %}
+            <article>
+                <div>
+                    {% if news_item.image %}
+                    <div>
+                        <a href="{% url 'news_detail' news_id=news_item.id %}">
+                            <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
+                        </a>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div>
+                            <h5>
+                                <a href="{% url 'news_detail' news_id=news_item.id %}">{{ news_item.title }}</a>
+                            </h5>
+                            <p>
+                                <small>
+                                    Опубл. (UTC): {{ news_item.created_at|timezone:"UTC"|date:"d/m/Y" }}
+                                    {% if news_item.created_at|date:"H:i" != "00:00" %}
+                                        ({{ news_item.created_at|timezone:"UTC"|date:"H:i" }})
+                                    {% endif %}
+                                    <br>
+                                    Опубл. ({{ user_timezone_str_ctx }}): {{ news_item.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
+                                    {% if news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %}
+                                        ({{ news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" }})
+                                    {% endif %}
+                                </small>
+                            </p>
+
+                             {% if news_item.updated_at|date:"YmdHis" != news_item.created_at|date:"YmdHis" %}
+                                <p>
+                                    <small>
+                                        Обнов. (UTC): {{ news_item.updated_at|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                                        Обнов. ({{ user_timezone_str_ctx }}): {{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                                    </small>
+                                </p>
+                            {% endif %}
+                            <p>{{ news_item.short_description|truncatewords_html:35|safe }}</p>
+                            <a href="{% url 'news_detail' news_id=news_item.id %}">Читать полностью &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+
+
+        {% if is_paginated %}
+            <nav>
+                <ul>
+                     {% if page_obj.has_previous %}
+                        <li><a href="?page=1{% if params_for_pagination %}&amp;{{ params_for_pagination }}{% endif %}">&laquo; Первая</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}{% if params_for_pagination %}&amp;{{ params_for_pagination }}{% endif %}">Предыдущая</a></li>
+                    {% else %}
+                        <li><span>&laquo; Первая</span></li>
+                        <li><span>Предыдущая</span></li>
+                    {% endif %}
+
+                    <li>
+                        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}{% if params_for_pagination %}&amp;{{ params_for_pagination }}{% endif %}">Следующая</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}{% if params_for_pagination %}&amp;{{ params_for_pagination }}{% endif %}">Последняя &raquo;</a></li>
+                    {% else %}
+                         <li><span>Следующая</span></li>
+                        <li><span>Последняя &raquo;</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <p>На данный момент новостей нет.</p>
+    {% endif %}
+    <div>
+        <a href="{% url 'home_page' %}">
+             На главную
+        </a>
+    </div>
+</div>
+
+{% endblock %}

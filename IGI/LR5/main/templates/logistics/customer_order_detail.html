@@ -1,0 +1,101 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+{% load tz %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <h4>{{ title }}</h4>
+                </div>
+                <div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div>
+                                {{ message }}
+
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <h5>Услуга: {{ order.service.name }}</h5>
+
+                    <div>
+                        <div>
+                            <p><strong>Статус заказа:</strong>
+                                <span>
+                                    {{ order.get_status_display }}
+                                </span>
+                            </p>
+                            <p>
+                                <strong>Дата создания (UTC):</strong> {{ order.created_at|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                                <strong>Дата создания ({{ user_timezone_str_ctx }}):</strong> {{ order.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                            </p>
+                            {% if order.updated_at|date:"YmdHis" != order.created_at|date:"YmdHis" %}
+                            <p>
+                                <strong>Обновлен (UTC):</strong> {{ order.updated_at|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                                <strong>Обновлен ({{ user_timezone_str_ctx }}):</strong> {{ order.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                            </p>
+                            {% endif %}
+
+                            {% if order.client %}
+                                <p><strong>Клиент:</strong> {{ order.client.first_name }} {{ order.client.last_name }} ({{ order.client.user.username }})</p>
+                                <p><strong>Email клиента:</strong> {{ order.client.email }}</p>
+                                <p><strong>Телефон клиента:</strong> {{ order.client.phone_number }}</p>
+                            {% elif order.organization %}
+                                <p><strong>Организация:</strong> {{ order.organization.name }} ({{ order.organization.user.username }})</p>
+                                <p><strong>Контактное лицо:</strong> {{ order.organization.contact_person_name|default:"Екатерина Смирнова" }}</p>
+                                <p><strong>Телефон организации:</strong> {{ order.organization.contact_phone }}</p>
+                                <p><strong>Email организации:</strong> {{ order.organization.contact_email }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p><strong>Адрес погрузки:</strong> {{ order.pickup_address }}</p>
+                            {% if order.pickup_datetime %}
+                            <p>
+                                <strong>Плановое время погрузки (UTC):</strong> {{ order.pickup_datetime|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                                <strong>Плановое время погрузки ({{ user_timezone_str_ctx }}):</strong> {{ order.pickup_datetime|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                            </p>
+                            {% endif %}
+                            <p><strong>Адрес доставки:</strong> {{ order.delivery_address }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {% if order.assigned_driver %}
+                        <h5>Информация о водителе:</h5>
+                        <p><strong>Имя:</strong> {{ order.assigned_driver.first_name }} {{ order.assigned_driver.last_name }}</p>
+                        <p><strong>Телефон:</strong> {{ order.assigned_driver.phone_number }}</p>
+                        {% if order.assigned_vehicle %}
+                            <p><strong>Транспорт:</strong> {{ order.assigned_vehicle.make }} {{ order.assigned_vehicle.model }} ({{ order.assigned_vehicle.license_plate }})</p>
+                        {% endif %}
+                    {% else %}
+                        <p>Водитель на этот заказ еще не назначен.</p>
+                    {% endif %}
+
+                    <hr>
+
+                    <h5>Детали груза:</h5>
+                    <p><strong>Вид груза:</strong> {{ order.cargo_type.name|default:"Бытовая техника" }}</p>
+                    <p><strong>Описание груза:</strong> {{ order.cargo_description|default:"Стиральная машина в заводской упаковке, 65кг, без подъема на этаж."|linebreaksbr }}</p>
+
+                    <hr>
+                    <div>
+                        <a href="{% url 'customer_account' %}">
+                             В кабинет
+                        </a>
+                        <a href="{% url 'order_list' %}">
+                             Ко всем моим заказам
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

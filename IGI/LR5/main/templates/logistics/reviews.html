@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отзывы о Сервисе - ВезёмВсё</title>
+
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home_page' %}">На главную</a>
+    </nav>
+
+    <h1>Отзывы о нашем сервисе</h1>
+
+    {% if reviews_list %}
+        <p>Здесь вы можете прочитать, что говорят о нас наши клиенты и водители.</p>
+        {% for review in reviews_list %}
+            <div>
+                <h3>
+                    {% if review.user %}
+                        {{ review.user.get_full_name|default:review.user.username }}
+                    {% elif review.author_name %}
+                        {{ review.author_name }}
+                    {% else %}
+                        Анонимный пользователь
+                    {% endif %}
+                </h3>
+                <div>
+                    <span>Дата: {{ review.created_at|date:"d.m.Y H:i" }}</span>
+                    {% if review.rating %}
+                        <span> | Оценка: {{ review.rating }}/5 ★</span>
+                    {% endif %}
+                </div>
+                <p>"{{ review.text|linebreaksbr }}"</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Пока нет ни одного отзыва. Будьте первым, кто поделится своим мнением о нашем сервисе!</p>
+    {% endif %}
+
+    <div>
+        <h2>Оставить отзыв</h2>
+        <p>Мы ценим ваше мнение! Функционал добавления отзывов напрямую через сайт будет доступен в ближайшее время. А пока вы можете отправить свой отзыв нам на почту: reviews@vezemvse.example.com</p>
+    </div>
+
+    <footer>
+        <p><a href="{% url 'home_page' %}">Вернуться на главную страницу</a></p>
+        <p>&copy; {% now "Y" %} «ВезёмВсё»</p>
+    </footer>
+</body>
+</html>

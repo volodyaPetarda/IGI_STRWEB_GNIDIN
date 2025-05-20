@@ -1,0 +1,75 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <h4>{{ title }}</h4>
+                </div>
+                <div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div>
+                                {{ message }}
+
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <p>Мы ценим ваше мнение! Пожалуйста, поделитесь своими впечатлениями о работе нашего сервиса.</p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.author_name %}
+                        <div>
+                            <label for="{{ form.author_name.id_for_label }}">{{ form.author_name.label }}</label>
+                            {{ form.author_name }}
+                            {% if form.author_name.errors %}
+                                <div>
+                                    {% for error in form.author_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div>
+                            <label for="{{ form.rating.id_for_label }}">{{ form.rating.label }}</label>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div>
+                                    {% for error in form.rating.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.text.id_for_label }}">{{ form.text.label }}</label>
+                            {{ form.text }}
+                            {% if form.text.errors %}
+                                <div>
+                                    {% for error in form.text.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <button type="submit">
+                                Отправить отзыв
+                            </button>
+                            <a href="{% url 'customer_account' %}">
+                                Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'logistics/base.html' %}
+{% load static %}
+
+{% block title %}Кабинет Клиента - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Кабинет Клиента: {{ user.username }}</h1>
+
+    {% if profile %}
+        <p>Добро пожаловать, {{ profile.first_name|default:user.username }}!</p>
+        <p>Email: {{ profile.email|default:"ivan.ivanov@example.com" }}</p>
+        <p>Телефон: {{ profile.phone_number|default:"+375 (29) 123-45-67" }}</p>
+    {% else %}
+        <p>Добро пожаловать, {{ user.username }}!</p>
+        <p><em>Информация о вашем профиле клиента не найдена. Пожалуйста, обратитесь в поддержку, если это ошибка.</em></p>
+    {% endif %}
+
+    <div>
+        <div>
+            <h3><a href="{% url 'create_order' %}">Оформить новый заказ</a></h3>
+            <p>Создайте новый заказ на перевозку ваших товаров или личных вещей.</p>
+        </div>
+        <div>
+            <h3><a href="{% url 'order_list' %}">Мои заказы</a></h3>
+            <p>Просмотрите полную историю ваших заказов, их статусы и детали.</p>
+        </div>
+        <div>
+            <h3><a href="{% url 'add_site_review' %}">Оставить отзыв о сервисе</a></h3>
+            <p>Поделитесь вашим мнением о работе нашего сайта и качестве услуг.</p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

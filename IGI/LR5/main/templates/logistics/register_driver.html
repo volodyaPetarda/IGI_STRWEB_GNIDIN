@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация нового водителя - ВезёмВсё</title>
+
+</head>
+<body>
+    <h1>Регистрация нового водителя</h1>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h2>Данные для входа (Пользователь)</h2>
+        {% for field in user_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.label == "Имя пользователя" %}
+                    <small>Например: petr_sidorov. Это имя будет видно другим пользователям.</small>
+                {% elif field.label == "Email" or field.label == "Адрес электронной почты" %}
+                    <small>Например: sidorov@example.com. Нужен для входа и уведомлений.</small>
+                {% elif field.label == "Пароль" %}
+                    <small>Придумайте надежный пароль: не менее 8 символов, включая буквы и цифры.</small>
+                {% elif field.label == "Подтверждение пароля" %}
+                    <small>Повторите пароль для проверки.</small>
+                {% elif field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <hr>
+        <h2>Данные водителя</h2>
+        {% for field in driver_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.label == "Имя" %}
+                    <small>Например: Пётр</small>
+                {% elif field.label == "Фамилия" %}
+                    <small>Например: Сидоров</small>
+                {% elif field.label == "Номер телефона" %}
+                    <small>Например: +375297654321. Используется для связи по заказам.</small>
+                {% elif field.label == "Дата рождения" %}
+                    <small>Укажите в формате ДД.ММ.ГГГГ или ГГГГ-ММ-ДД.</small>
+                {% elif field.label == "Номер водительского удостоверения" %}
+                    <small>Например: 5АА123456. Указывается как в документе.</small>
+                {% elif field.label == "Стаж вождения (лет)" %}
+                    <small>Например: 5. Укажите количество полных лет.</small>
+                {% elif field.label == "Тип транспортного средства" %}
+                    <small>Например: Легковой автомобиль, Грузовик до 3.5т, Фургон.</small>
+                {% elif field.label == "Регистрационный номер ТС" %}
+                    <small>Например: 1234 AB-7. Указывается как в техпаспорте.</small>
+                {% elif field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+</body>
+</html>

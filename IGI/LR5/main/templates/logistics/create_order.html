@@ -1,0 +1,64 @@
+{% extends 'logistics/base.html' %}
+
+{% block title %}{{ title }} - ВезёмВсё{% endblock %}
+
+{% block content %}
+<div>
+    <h1>{{ title }}</h1>
+    <p>Пожалуйста, заполните все поля для оформления вашего заказа.</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div>
+            <label for="{{ form.service.id_for_label }}">{{ form.service.label }}</label>
+            {{ form.service }}
+            {% if form.service.errors %}<div>{{ form.service.errors }}</div>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.cargo_type.id_for_label }}">{{ form.cargo_type.label }}</label>
+            {{ form.cargo_type }}
+            {% if form.cargo_type.errors %}<div>{{ form.cargo_type.errors }}</div>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.cargo_description.id_for_label }}">{{ form.cargo_description.label }}</label>
+            {{ form.cargo_description }}
+            {% if form.cargo_description.errors %}<div>{{ form.cargo_description.errors }}</div>{% endif %}
+            <small>Пример: Антикварная ваза, 2кг, 30х25х40см, крайне хрупкое, везти очень осторожно.</small>
+        </div>
+
+        <div>
+            <div>
+                <label for="{{ form.pickup_address.id_for_label }}">{{ form.pickup_address.label }}</label>
+                {{ form.pickup_address }}
+                {% if form.pickup_address.errors %}<div>{{ form.pickup_address.errors }}</div>{% endif %}
+            </div>
+            <div>
+                <label for="{{ form.delivery_address.id_for_label }}">{{ form.delivery_address.label }}</label>
+                {{ form.delivery_address }}
+                {% if form.delivery_address.errors %}<div>{{ form.delivery_address.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div>
+            <label for="{{ form.pickup_datetime.id_for_label }}">{{ form.pickup_datetime.label }}</label>
+            <div>
+                {{ form.pickup_datetime.0_0 }}
+                {{ form.pickup_datetime.0_1 }}
+            </div>
+            {% if form.pickup_datetime.errors %}<div>{{ form.pickup_datetime.errors }}</div>{% endif %}
+            <small>Пример: 22.07.2025, после 14:00. Груз будет готов на складе №3.</small>
+        </div>
+
+        <div>
+            <button type="submit">Оформить заказ</button>
+            <a href="{% url 'account_hub' %}">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

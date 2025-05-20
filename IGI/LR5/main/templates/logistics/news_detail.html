@@ -1,0 +1,61 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+{% load tz %}
+
+{% block title %}{{ title }} - ВезёмВсё{% endblock %}
+
+{% block content %}
+<div>
+    <article>
+        <h1>{{ news_item.title }}</h1>
+        <p>
+            <small>
+                Опубликовано (UTC): {{ news_item.created_at|timezone:"UTC"|date:"d/m/Y" }}
+                {% if news_item.created_at|date:"H:i" != "00:00" %}
+                ({{ news_item.created_at|timezone:"UTC"|date:"H:i" }})
+                {% endif %}
+                <br>
+                Опубликовано ({{ user_timezone_str_ctx }}): {{ news_item.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
+                {% if news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %}
+                ({{ news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" }})
+                {% endif %}
+            </small>
+
+            {% if news_item.updated_at|date:"YmdHis" != news_item.created_at|date:"YmdHis" %}
+                <span>|</span>
+                <small>
+                    Обновлено (UTC): {{ news_item.updated_at|timezone:"UTC"|date:"d/m/Y" }}
+                    {% if news_item.updated_at|timezone:"UTC"|date:"H:i" != "00:00" %}
+                        ({{ news_item.updated_at|timezone:"UTC"|date:"H:i" }})
+                    {% endif %}
+                    <br>
+                    Обновлено ({{ user_timezone_str_ctx }}): {{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
+                    {% if news_item.updated_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %}
+                        ({{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"H:i" }})
+                    {% endif %}
+                </small>
+            {% endif %}
+        </p>
+
+        {% if news_item.image %}
+            <div>
+                <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
+            </div>
+        {% endif %}
+
+        <div>
+            {{ news_item.full_description|linebreaksbr }}
+        </div>
+    </article>
+
+    <div>
+        <a href="{% url 'news_list' %}">
+             Все новости
+        </a>
+        <a href="{% url 'home_page' %}">
+             На главную
+        </a>
+    </div>
+</div>
+
+{% endblock %}

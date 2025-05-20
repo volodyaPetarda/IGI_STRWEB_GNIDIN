@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация нового клиента - ВезёмВсё</title>
+
+</head>
+<body>
+    <h1>Регистрация нового клиента</h1>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h2>Данные для входа (Пользователь)</h2>
+        {% for field in user_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.label == "Имя пользователя" %}
+                    <small>Например: ivan_petrov. Это имя будет видно другим пользователям.</small>
+                {% elif field.label == "Email" or field.label == "Адрес электронной почты" %}
+                    <small>Например: ivanov@example.com. Нужен для входа и уведомлений.</small>
+                {% elif field.label == "Пароль" %}
+                    <small>Придумайте надежный пароль: не менее 8 символов, включая буквы и цифры.</small>
+                {% elif field.label == "Подтверждение пароля" %}
+                    <small>Повторите пароль для проверки.</small>
+                {% elif field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <hr>
+        <h2>Данные клиента</h2>
+        {% for field in client_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.label == "Имя" %}
+                    <small>Например: Иван</small>
+                {% elif field.label == "Фамилия" %}
+                    <small>Например: Иванов</small>
+                {% elif field.label == "Номер телефона" %}
+                    <small>Например: +375291234567. Используется для связи по заказам.</small>
+                {% elif field.label == "Дата рождения" %}
+                    <small>Укажите в формате ДД.ММ.ГГГГ или ГГГГ-ММ-ДД.</small>
+                {% elif field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+</body>
+</html>

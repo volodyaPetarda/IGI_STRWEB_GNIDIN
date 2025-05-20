@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - ВезёмВсё</title>
+
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home_page' %}">ВезёмВсё</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'account_hub' %}">Кабинет</a>
+            <a href="{% url 'news_list' %}">Новости</a>
+            <a href="{% url 'promocodes' %}">Акции</a>
+            <a href="{% url 'random_fact_pet' %}">Развлечения</a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Выйти ({{ user.username }})</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Войти</a>
+            <a href="#registration-options">Регистрация</a>
+            <a href="{% url 'news_list' %}">Новости</a>
+            <a href="{% url 'promocodes' %}">Акции</a>
+            <a href="{% url 'random_fact_pet' %}">Развлечения</a>
+        {% endif %}
+    </nav>
+
+    <div>
+        <h1>Добро пожаловать в «ВезёмВсё»!</h1>
+        <p>Ваш надежный сервис для быстрой и удобной организации грузоперевозок. Мы соединяем клиентов с проверенными водителями и транспортными компаниями.</p>
+
+        {% if user.is_authenticated %}
+            <p>Вы вошли как <strong>{{ user.username }}</strong>.</p>
+            <p><a href="{% url 'account_hub' %}">Перейти в мой кабинет</a></p>
+        {% else %}
+            <p>Войдите в систему или зарегистрируйтесь, чтобы разместить заказ или предложить свои услуги перевозчика.</p>
+            <div id="registration-options">
+                <a href="{% url 'register_driver' %}">Я Водитель</a>
+                <a href="{% url 'register_client' %}">Я Клиент</a>
+                <a href="{% url 'register_organization' %}">Я Организация</a>
+            </div>
+        {% endif %}
+
+
+        {% if latest_news %}
+        <section>
+            <h2>Последние новости</h2>
+            <article>
+                {% if latest_news.image %}
+                    <img src="{{ latest_news.image.url }}" alt="{{ latest_news.title }}">
+                {% endif %}
+                <div>
+                    <h3>{{ latest_news.title }}</h3>
+                    <p>{{ latest_news.short_description|truncatewords_html:40|safe }}</p>
+                    <a href="{% url 'news_detail' news_id=latest_news.id %}">Читать далее...</a>
+                </div>
+            </article>
+            <a href="{% url 'news_list' %}">Все новости &rarr;</a>
+        </section>
+        {% else %}
+        <section>
+             <h2>Новости</h2>
+            <p>Пока нет свежих новостей, но скоро они появятся!</p>
+            <a href="{% url 'news_list' %}">Архив новостей (если есть) &rarr;</a>
+        </section>
+        {% endif %}
+
+
+    </div>
+
+    <footer>
+        <nav>
+            <a href="{% url 'promocodes' %}">Акции и промокоды</a>
+            <a href="{% url 'reviews' %}">Отзывы клиентов</a>
+            <a href="{% url 'about_us' %}">О нас</a>
+            <a href="{% url 'privacy_policy' %}">Политика конфиденциальности</a>
+            <a href="{% url 'news_list' %}">Новости</a>
+        </nav>
+        <p>&copy; {% now "Y" %} «ВезёмВсё». Все права защищены.</p>
+        <p>Если у вас есть вопросы, свяжитесь с нами: info@vezemvse.by</p>
+    </footer>
+
+</body>
+</html>

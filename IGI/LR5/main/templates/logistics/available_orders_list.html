@@ -1,0 +1,55 @@
+{% extends "logistics/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div>
+    <h2>{{ title }}</h2>
+    {% if driver_profile %}
+        <p>Здравствуйте, {{ driver_profile.first_name }}! Выберите заказ для выполнения.</p>
+    {% endif %}
+    <hr>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if available_orders %}
+        <div>
+            {% for order in available_orders %}
+                <div>
+                    <div>
+                        <h5>Заказ #{{ order.id }} - {{ order.service.name }}</h5>
+                        <small>Размещен: {{ order.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    <p><strong>Статус:</strong> <span>
+                        {{ order.get_status_display }}
+                    </span></p>
+                    <p><strong>Маршрут:</strong> {{ order.pickup_address }} &rarr; {{ order.delivery_address }}</p>
+                    <p><strong>Плановое время погрузки:</strong> {{ order.pickup_datetime|date:"d.m.Y H:i" }} (UTC)</p>
+                    {% if order.client %}
+                        <p><strong>Заказчик:</strong> Клиент (Физ. лицо)</p>
+                    {% elif order.organization %}
+                        <p><strong>Заказчик:</strong> {{ order.organization.name }}</p>
+                    {% endif %}
+                    <p><strong>Описание груза:</strong> {{ order.cargo_description|truncatewords:25 }}</p>
+                    <p><strong>Тип груза:</strong> {{ order.cargo_type.name }}</p>
+
+                    <form method="post" action="{% url 'driver_take_order' order_id=order.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Взять заказ</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div>
+            На данный момент нет доступных заказов.
+        </div>
+    {% endif %}
+    <hr>
+    <a href="{% url 'driver_account' %}">Вернуться в мой кабинет</a>
+</div>
+{% endblock %}

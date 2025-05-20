@@ -1,0 +1,48 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <h4>{{ title }}</h4>
+                </div>
+                <div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div>
+                                {{ message }}
+
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <p>Вы уверены, что хотите удалить свой аккаунт водителя, <strong>{{ profile.user.username }}</strong>?</p>
+                    <p><strong>ВНИМАНИЕ:</strong> Это действие необратимо! Все ваши данные, связанные с этим аккаунтом (включая информацию о профиле), будут удалены.</p>
+                    <p>Заказы, которые вы выполняли, останутся в системе, но больше не будут связаны с вашим аккаунтом (поле "назначенный водитель" будет очищено).</p>
+
+                    <hr>
+                    <p>Для подтверждения удаления, пожалуйста, нажмите кнопку ниже.</p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div>
+                            <button type="submit">
+                                Да, удалить мой аккаунт
+                            </button>
+                            <a href="{% url 'driver_account' %}">
+                                Нет, отменить
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

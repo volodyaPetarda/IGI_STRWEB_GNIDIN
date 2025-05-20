@@ -1,0 +1,73 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <h4>{{ title }}</h4>
+                </div>
+                <div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div>
+                                {{ message }}
+
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div>
+                        <h5>Детали заказа:</h5>
+                        <p><strong>ID Заказа:</strong> {{ order.id }}</p>
+                        <p><strong>Услуга:</strong> {{ order.service.name }}</p>
+                        <p><strong>Текущий статус:</strong> <span>{{ order.get_status_display }}</span></p>
+                        <p><strong>Адрес погрузки:</strong> {{ order.pickup_address }}</p>
+                        <p><strong>Адрес доставки:</strong> {{ order.delivery_address }}</p>
+                        <p><strong>Плановое время погрузки:</strong> {{ order.pickup_datetime|date:"d.m.Y H:i" }} (UTC)</p>
+                        {% if order.client %}
+                            <p><strong>Клиент:</strong> {{ order.client.first_name }} {{ order.client.last_name }}</p>
+                        {% elif order.organization %}
+                            <p><strong>Организация:</strong> {{ order.organization.name }}</p>
+                        {% endif %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div>
+                            <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div>
+                                    {% for error in form.status.errors %}
+                                        <span>{{ error }}</span><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.status.help_text %}
+                                <small>Выберите новый статус заказа. Например: "В пути" или "Доставлен".</small>
+                            {% else %}
+                                <small>Выберите новый статус заказа. Например: "В пути" или "Доставлен".</small>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <button type="submit">
+                                Обновить статус
+                            </button>
+                            <a href="{% url 'driver_account' %}">
+                                Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

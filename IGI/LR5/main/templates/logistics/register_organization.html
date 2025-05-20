@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация новой организации - ВезёмВсё</title>
+
+</head>
+<body>
+    <h1>Регистрация новой организации</h1>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h2>Данные для входа (Аккаунт организации)</h2>
+        {% for field in user_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.label == "Имя пользователя" %}
+                    <small>Например: vezemvse_logistics. Это имя будет использоваться для входа.</small>
+                {% elif field.label == "Email" or field.label == "Адрес электронной почты" %}
+                    <small>Например: office@vezemvse_logistics.com. Нужен для входа и официальных уведомлений.</small>
+                {% elif field.label == "Пароль" %}
+                    <small>Придумайте надежный пароль: не менее 8 символов, включая буквы и цифры.</small>
+                {% elif field.label == "Подтверждение пароля" %}
+                    <small>Повторите пароль для проверки.</small>
+                {% elif field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    <ul>
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <hr>
+        <h2>Данные организации</h2>
+        {% for field in organization_form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.label == "Название организации" %}
+                    <small>Например: ООО "ВезёмВсё Логистик"</small>
+                {% elif field.label == "Контактное лицо (ФИО)" %}
+                    <small>Например: Иванов Иван Иванович, ответственный менеджер.</small>
+                {% elif field.label == "Контактный телефон организации" or field.label == "Телефон организации" %}
+                    <small>Например: +375171234567 (городской) или +375291234567 (мобильный).</small>
+                {% elif field.label == "Контактный email организации" or field.label == "Email организации" %}
+                    <small>Например: info@vezemvse_logistics.com. Для оперативной связи.</small>
+                {% elif field.label == "Юридический адрес" %}
+                    <small>Полный адрес, включая индекс, город, улицу, дом.</small>
+                {% elif field.label == "Регистрационный номер (УНП/ИНН)" or field.label == "УНП" or field.label == "ИНН" %}
+                    <small>Например: 123456789.</small>
+                {% elif field.label == "Тип организации" %}
+                    <small>Например: ООО, ЗАО, ИП, Транспортная компания, Производство.</small>
+                {% elif field.label == "Описание деятельности" %}
+                    <small>Кратко опишите основные направления деятельности вашей организации.</small>
+                {% elif field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    <ul>
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit">Зарегистрировать организацию</button>
+    </form>
+</body>
+</html>

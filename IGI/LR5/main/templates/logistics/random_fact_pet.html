@@ -1,0 +1,44 @@
+{% extends "logistics/base.html" %}
+
+{% block title %}Уголок Развлечений - ВезёмВсё{% endblock %}
+
+{% block head_extra %}
+    {{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Уголок Развлечений</h1>
+
+    {% if error_message_pet %}
+
+        <p><strong>Проблема с питомцем:</strong> {{ error_message_pet }}</p>
+    {% endif %}
+    {% if error_message_fact %}
+        <p><strong>Проблема с фактом:</strong> {{ error_message_fact }}</p>
+    {% endif %}
+
+    <div>
+        {% if pet_image_url %}
+            <img src="{{ pet_image_url }}" alt="Случайная зверушка">
+        {% else %}
+            {% if not error_message_pet %}
+            <p>Изображение питомца загружается...</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div>
+        {% if fact_text %}
+            <p>{{ fact_text }}</p>
+        {% else %}
+             {% if not error_message_fact %}
+            <p>Факт загружается...</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <a href="{% url 'random_fact_pet' %}">Удиви меня еще!</a>
+</div>
+{% endblock %}

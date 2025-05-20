@@ -1,0 +1,151 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+{% load tz %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div>
+    <div>
+        <h1>{{ title }}</h1>
+        {% if user_type != "Водитель" %}
+        <a href="{% url 'create_order' %}">
+            Оформить новый заказ
+        </a>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div>
+                {{ message }}
+
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if page_obj.object_list %}
+        <div>
+            {% for order in page_obj.object_list %}
+                <div>
+                    <div>
+                        <h5>Заказ #{{ order.id }}
+                            {% if order.service %}<small>- {{ order.service.name }}</small>{% endif %}
+                        </h5>
+                        <small>
+                            Создан (UTC): {{ order.created_at|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                            Создан ({{ user_timezone_str_ctx }}): {{ order.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                    <p>
+                        <strong>Статус:</strong>
+                        <span>
+                            {{ order.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Маршрут:</strong> {{ order.pickup_address }} &rarr; {{ order.delivery_address }}</p>
+                    {% if order.pickup_datetime %}
+                    <p>
+                        <strong>Погрузка (UTC):</strong> {{ order.pickup_datetime|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                        <strong>Погрузка ({{ user_timezone_str_ctx }}):</strong> {{ order.pickup_datetime|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                    </p>
+                    {% endif %}
+                    {% if order.assigned_driver %}
+                        <p><strong>Водитель:</strong> {{ order.assigned_driver.first_name }} {{ order.assigned_driver.last_name }}</p>
+                    {% endif %}
+
+
+                    {% if order.updated_at|date:"YmdHis" != order.created_at|date:"YmdHis" %}
+                    <p>
+                        Обновлен (UTC): {{ order.updated_at|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
+                        Обновлен ({{ user_timezone_str_ctx }}): {{ order.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
+                    </p>
+                    {% endif %}
+
+                    <div>
+                        <a href="{% url 'customer_order_detail' order_id=order.id %}">
+                             Подробнее
+                        </a>
+                        {% if user_type == "Водитель" and order.status != 'delivered' and order.status != 'cancelled' %}
+                            <a href="{% url 'driver_update_order_status' order_id=order.id %}">
+                                 Обновить статус
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul>
+                    {% if page_obj.has_previous %}
+                        <li>
+                            <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <span>&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li aria-current="page"><span>{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                             {% if forloop.first and page_obj.number > 4 %}
+                                <li><a href="?page=1">1</a></li>
+                                <li><span>...</span></li>
+                             {% elif forloop.last and page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                                <li><span>...</span></li>
+                                <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+                             {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li>
+                            <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <span>&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <div>
+            <h4>У вас пока нет заказов.</h4>
+            {% if user_type != "Водитель" %}
+            <p>Вы можете создать свой первый заказ прямо сейчас.</p>
+            <hr>
+            <a href="{% url 'create_order' %}">
+                Оформить заказ
+            </a>
+            {% else %}
+            <p>Вам еще не назначено ни одного заказа, или нет доступных заказов для взятия.</p>
+             <hr>
+            <a href="{% url 'available_orders_list' %}">
+                Посмотреть доступные заказы
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div>
+        <a href="{% url 'account_hub' %}">
+             Вернуться в личный кабинет
+        </a>
+    </div>
+</div>
+{% endblock %}

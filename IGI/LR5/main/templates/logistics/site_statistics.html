@@ -1,0 +1,34 @@
+{% extends 'logistics/base.html' %}
+
+{% block title %}Статистика Сайта - ВезёмВсё{% endblock %}
+
+{% block head_extra %}
+    {{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Статистика Сайта</h1>
+
+    <div>
+        <section>
+            <h2>Типы пользователей</h2>
+            {% if user_types_chart %}
+                <img src="{{ user_types_chart }}" alt="Круговая диаграмма типов пользователей">
+            {% else %}
+                <p>Нет данных для отображения диаграммы типов пользователей.</p>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2>Распределение возрастов (Водители и Клиенты)</h2>
+            {% if ages_histogram_chart %}
+                <img src="{{ ages_histogram_chart }}" alt="Гистограмма распределения возрастов">
+            {% else %}
+                <p>Нет данных для отображения гистограммы возрастов (возможно, не указаны даты рождения или нет пользователей нужных типов).</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
