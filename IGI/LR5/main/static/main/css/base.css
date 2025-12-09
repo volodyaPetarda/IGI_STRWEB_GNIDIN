@@ -1,0 +1,115 @@
+/* Base CSS scaffold for LR2 - Variables, reset, gradient background, and fonts */
+/* No external CSS libraries. Web fonts loaded from a font service. */
+
+/* Web fonts: Inter (primary sans, Cyrillic) and Merriweather (serif alt) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:wght@400;700&display=swap');
+
+:root {
+  /* Colors */
+  --color-bg-start: #0f2027;
+  --color-bg-mid: #203a43;
+  --color-bg-end: #2c5364;
+  --color-surface: #ffffff;
+  --color-text: #0d1321;
+  --color-muted: #5f6c7b;
+  --color-primary: #1e88e5;
+  --color-accent: #ffb300;
+  --color-danger: #e53935;
+  --color-success: #43a047;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radius & shadow */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-alt: var(--font-serif);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --fs-1: 12px;
+  --fs-2: 14px;
+  --fs-3: 16px;
+  --fs-4: 18px;
+  --fs-5: 22px;
+  --fs-6: 28px;
+
+  /* Layout */
+  --header-h: 64px; /* default fixed header height for content offset */
+}
+
+/* Reset-ish */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-3);
+  line-height: 1.6;
+  color: var(--color-surface);
+  font-kerning: normal;
+  font-variant-ligatures: contextual common-ligatures;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-optical-sizing: auto;
+  /* Жвакина хочет градиент: */
+  background: linear-gradient(135deg, var(--color-bg-start), var(--color-bg-mid), var(--color-bg-end));
+  background-attachment: fixed;
+}
+
+img, video, canvas, svg { display: block; max-width: 100%; height: auto; }
+input, button, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+/* Links: dynamic states */
+a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; transition: color .15s ease, text-decoration-color .15s ease, background-color .15s ease; cursor: pointer; }
+a:link { color: var(--color-accent); }
+a:visited { color: #bb86fc; /* distinct visited color on dark bg */ }
+a:hover { color: #ffd54f; text-decoration-thickness: 2px; }
+a:active { color: #ffc107; }
+
+/* Focus styles for accessibility */
+:focus { outline: none; }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 3px solid rgba(255, 179, 0, 0.9);
+  outline-offset: 2px;
+  text-decoration-thickness: 3px;
+}
+
+/* Make summary clearly interactive (used in FAQ) */
+summary { cursor: pointer; }
+summary:hover { color: #ffd54f; }
+
+/* Headings and text */
+h1, h2, h3, h4, h5, h6 { margin: 0 0 var(--space-3) 0; line-height: 1.25; text-transform: none; }
+p { margin: 0 0 var(--space-3) 0; }
+
+/* Helpers */
+.container { width: min(1100px, 100% - 2*var(--space-5)); margin-inline: auto; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
+.text-surface { color: var(--color-surface); }
+.text-muted { color: var(--color-muted); }
+/* Font utilities */
+.font-sans { font-family: var(--font-sans) !important; }
+.font-serif { font-family: var(--font-serif) !important; }
+.font-alt { font-family: var(--font-alt) !important; }
+
+/* Page chrome placeholders (will be extended in layout.css) */
+header, footer { color: var(--color-surface); }
+main { background: transparent; }

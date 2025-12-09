@@ -1,0 +1,37 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+<section id="services-catalog" aria-labelledby="services-title">
+    <h1 id="services-title">{{ title }}</h1>
+
+    {% if services %}
+        <ul class="catalog-grid" role="list">
+            {% for svc in services %}
+                <li class="catalog-card">
+                    <article class="card">
+                        <header>
+                            <h3>{{ svc.name }}</h3>
+                        </header>
+                        <p class="catalog-desc">{{ svc.description }}</p>
+                        <p class="catalog-price"><strong>Базовая стоимость:</strong> <data value="{{ svc.base_price|floatformat:'-2' }}">{{ svc.base_price|floatformat:"-2" }}</data> руб.</p>
+                        <p class="catalog-cta"><a class="btn" href="{% url 'create_order' %}">Оформить заказ</a></p>
+                    </article>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Пока нет доступных услуг.</p>
+    {% endif %}
+
+    <nav aria-label="Навигация">
+        <a href="{% url 'home_page' %}">На главную</a>
+    </nav>
+</section>
+{% endblock %}

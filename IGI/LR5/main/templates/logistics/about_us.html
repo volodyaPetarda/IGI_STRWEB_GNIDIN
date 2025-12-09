@@ -1,94 +1,188 @@
+{% extends "logistics/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }} - ВезёмВсё</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-    <nav>
-        <a href="{% url 'home_page' %}">На главную</a>
-    </nav>
 
-    <div>
-        <h1>{{ title }}</h1>
+{% block title %}{{ title|default:"О нас" }}{% endblock %}
 
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/company.css' %}">
+{% endblock %}
+
+{% block head_extra %}
+    {{ block.super }}
+    <meta name="description" content="{{ company.description|default:'О компании ВезёмВсё'|striptags|truncatechars:160 }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ title }}">
+    {% if company.logo %}<meta property="og:image" content="{{ company.logo.url }}">{% else %}<meta property="og:image" content="/media/logo.jpg">{% endif %}
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}">
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@type":"Organization",
+      "name":"{{ company.company_name|default:'ВезёмВсё' }}",
+      "url":"{{ request.scheme }}://{{ request.get_host }}",
+      {% if company.logo %}"logo":"{{ company.logo.url }}",{% else %}"logo":"{{ request.scheme }}://{{ request.get_host }}/media/logo.jpg",{% endif %}
+      "description": {{ company.description|default:'О компании ВезёмВсё'|striptags|truncatechars:200|escapejs
+    }
+    </script>
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+
+{% if company %}
+    <section aria-labelledby="about-who">
+        <h2 id="about-who">Кто мы такие?</h2>
+        {% if company.logo %}
+            <figure>
+                <img src="{{ company.logo.url }}" alt="Логотип компании {{ company.company_name }}">
+                <figcaption>{{ company.company_name }}</figcaption>
+            </figure>
+        {% endif %}
+        <p>{{ company.description|linebreaksbr }}</p>
+    </section>
+
+    {% if company.video_url %}
+    <section aria-labelledby="about-video">
+        <h2 id="about-video">Видео</h2>
         <div>
-            <img src="{% static 'main/images/company_logo.jpg' %}" alt="Логотип компании ВезёмВсё">
-            <p><small><em>Наш дружный коллектив готов решать ваши логистические задачи!</em></small></p>
+            <iframe width="560" height="315" src="{{ company.video_embed_src|default:company.video_url }}" title="О компании" frameborder="0" allowfullscreen></iframe>
         </div>
+    </section>
+    {% endif %}
 
-        <section>
-            <h2>Кто мы такие?</h2>
-            <p>Добро пожаловать в «ВезёмВсё» – ваш надежный партнер в мире грузоперевозок! Мы – команда энтузиастов и
-                профессионалов, объединенных общей целью: сделать логистику простой, быстрой и доступной для каждого – будь то
-                частное лицо с небольшим переездом или крупная организация с регулярными поставками.</p>
-            <p>Наш сервис был запущен в <strong>2023</strong> году с идеей изменить представление о грузоперевозках,
-                предложив современную платформу, которая соединяет заказчиков и проверенных водителей по всей Беларуси.</p>
-        </section>
+    {% if history_items %}
+    <section aria-labelledby="about-history" id="about-history">
+        <h2 id="about-history">История по годам</h2>
+        <ul class="timeline">
+            {% for item in history_items %}
+                <li>
+                    <div class="timeline-dot" aria-hidden="true"></div>
+                    <div class="timeline-content">
+                        <h3 class="year">{{ item.year }}</h3>
+                        <p class="desc">{{ item.text|linebreaksbr }}</p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
 
-        <section>
-            <h2>Наша миссия</h2>
-            <p>
-                "Предоставлять высококачественные, технологичные и безопасные логистические решения, которые экономят время и
-                ресурсы наших клиентов, способствуя развитию их бизнеса и улучшению качества жизни, с особым фокусом на индивидуальный подход."
-            </p>
-        </section>
+    <section aria-labelledby="about-requisites" id="about-requisites">
+        <h2 id="about-requisites">Реквизиты</h2>
+        <pre class="requisites-block">{{ company.requisites }}</pre>
+    </section>
 
-        <section>
-            <h2>Почему выбирают нас?</h2>
-            <ul>
-                <li><strong>Надежность:</strong> Мы тщательно отбираем и проверяем всех водителей и транспортные средства. Каждый водитель проходит проверку документов и собеседование.</li>
-                <li><strong>Удобство:</strong> Простой и интуитивно понятный интерфейс для заказа и отслеживания перевозок онлайн 24/7.</li>
-                <li><strong>Гибкость:</strong> Широкий спектр услуг – от перевозки документов и мелких посылок до переездов и доставки крупногабаритных грузов.</li>
-                <li><strong>Прозрачность:</strong> Честные цены без скрытых платежей. Вы всегда знаете стоимость до подтверждения заказа.</li>
-                <li><strong>Поддержка:</strong> Наша служба поддержки клиентов работает с 9:00 до 21:00 и всегда готова помочь вам на каждом этапе.</li>
-                <li><strong>Технологии:</strong> Мы постоянно развиваем нашу платформу, внедряя новые технологии для вашего удобства, включая мобильное приложение для водителей и клиентов (в разработке).</li>
-                <li><strong>Покрытие:</strong> Осуществляем перевозки по Минску, областным центрам и всей территории Республики Беларусь.</li>
-            </ul>
-        </section>
+    <section aria-labelledby="about-cert" id="certificates" itemprop="hasCertification" itemscope itemtype="https://schema.org/EducationalOccupationalCredential">
+        <h2 id="about-cert">Сертификаты и лицензии</h2>
+        <div class="certificate">
+            <div class="certificate-border" aria-hidden="true"></div>
+            <div class="certificate-content">
+                <header class="certificate-header">
+                    <h1 itemprop="name">Лицензия</h1>
+                    <p class="subtitle">на осуществление деятельности в сфере логистики</p>
+                </header>
 
-        <section>
-            <h2>Наша команда</h2>
-            <p>За успехом «ВезёмВсё» стоит команда увлеченных своим делом людей. Мы верим, что именно люди – главный актив любой компании.</p>
-            <div>
-                <strong>Владислав Гнидин</strong>
-                <span>Основатель и идейный вдохновитель. Увлечен созданием инновационных решений в логистике.</span>
+                <section class="meta-info">
+                    <span class="city">г. Минск</span>
+                    <span class="date">{{ now|date:"d E Y" }}</span>
+                </section>
+
+                <section class="org-info">
+                    <p class="org-name">{{ company.company_name|default:'ООО «ВезёмВсё»' }}</p>
+                    <p class="org-inn">ИНН 190000000 | УНП 190000000</p>
+                    <h3 class="registry-number">Реестровый номер: 000000</h3>
+                </section>
+
+                <section class="signature-area">
+                    <div class="director-details">
+                        <p class="director-name">Иванов И.И.</p>
+                        <p class="director-title">Директор</p>
+                    </div>
+                    <div class="seal-container">
+                        <img src="https://i.postimg.cc/D0sKhrcj/image.png" alt="Печать" class="seal-image" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/media/partner_logo.jpg';">
+                    </div>
+                </section>
+
+                <hr class="footer-divider">
+
+                <footer class="licensee-details">
+                    <img src="https://i.postimg.cc/Bn9CYxkq/image.png" alt="Логотип" class="footer-logo" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/media/company/logo.jpg';">
+                    <div class="details-text">
+                        <p>
+                            <strong>Лицензиат:</strong> {{ company.company_name|default:'ООО «ВезёмВсё»' }}<br>
+                            <strong>ОГРН/УНП:</strong> 190000000<br>
+                            <strong>Юридический адрес:</strong> Республика Беларусь, г. Минск<br>
+                            <strong>Адрес деятельности:</strong> Республика Беларусь, г. Минск
+                        </p>
+                    </div>
+                </footer>
             </div>
-            <div>
-                <strong>Гнидин Владислав</strong>
-                <span>Руководитель отдела по работе с клиентами. Убежден, что довольный клиент – лучшая реклама.</span>
-            </div>
-            <div>
-                <strong>Владислав Владиславович</strong>
-                <span>Технический директор. Отвечает за стабильность и развитие нашей платформы.</span>
-            </div>
-            <p><em>... и многие другие талантливые специалисты, от логистов до разработчиков, ежедневно работающие над улучшением нашего сервиса!</em></p>
-        </section>
+        </div>
+    </section>
+{% endif %}
 
-        <section>
-            <h2>Наши ценности</h2>
-            <ul>
-                <li><strong>Клиент в центре всего:</strong> Мы стремимся превосходить ожидания наших клиентов.</li>
-                <li><strong>Ответственность и надежность:</strong> Мы отвечаем за каждый принятый заказ и доверенный нам груз.</li>
-                <li><strong>Инновации и развитие:</strong> Мы не стоим на месте и постоянно ищем новые пути для улучшения сервиса.</li>
-                <li><strong>Командная работа и уважение:</strong> Мы ценим вклад каждого сотрудника и строим работу на взаимном уважении.</li>
-                <li><strong>Честность и открытость:</strong> Мы ведем бизнес прозрачно и честно.</li>
-            </ul>
-        </section>
+<section>
+    <h2>Кто мы такие?</h2>
+    <p>Добро пожаловать в «ВезёмВсё» – ваш надежный партнер в мире грузоперевозок! Мы – команда энтузиастов и
+        профессионалов, объединенных общей целью: сделать логистику простой, быстрой и доступной для каждого – будь то
+        частное лицо с небольшим переездом или крупная организация с регулярными поставками.</p>
+    <p>Наш сервис был запущен в <strong>2023</strong> году с идеей изменить представление о грузоперевозках,
+        предложив современную платформу, которая соединяет заказчиков и проверенных водителей по всей Беларуси.</p>
+</section>
 
-        <section>
-            <h2>Свяжитесь с нами</h2>
-            <p>Мы всегда открыты для общения и готовы ответить на ваши вопросы. Вы можете связаться с нами через форму
-                обратной связи на сайте (если она есть), по электронной почте <a href="mailto:info@vezemvse.by">info@vezemvse.by</a> или по телефону <strong>+375 (29) 123-45-67</strong> (с 9:00 до 21:00).</p>
-            <p>Спасибо, что выбрали «ВезёмВсё»!</p>
-        </section>
+<section>
+    <h2>Наша миссия</h2>
+    <p>
+        "Предоставлять высококачественные, технологичные и безопасные логистические решения, которые экономят время и
+        ресурсы наших клиентов, способствуя развитию их бизнеса и улучшению качества жизни, с особым фокусом на индивидуальный подход."
+    </p>
+</section>
+
+<section>
+    <h2>Почему выбирают нас?</h2>
+    <ul>
+        <li><strong>Надежность:</strong> Мы тщательно отбираем и проверяем всех водителей и транспортные средства. Каждый водитель проходит проверку документов и собеседование.</li>
+        <li><strong>Удобство:</strong> Простой и интуитивно понятный интерфейс для заказа и отслеживания перевозок онлайн <abbr title="24 часа в сутки, 7 дней в неделю">24/7</abbr>.</li>
+        <li><strong>Гибкость:</strong> Широкий спектр услуг – от перевозки документов и мелких посылок до переездов и доставки крупногабаритных грузов.</li>
+        <li><strong>Прозрачность:</strong> Честные цены без скрытых платежей. Вы всегда знаете стоимость до подтверждения заказа.</li>
+        <li><strong>Поддержка:</strong> Наша служба поддержки клиентов работает с 9:00 до 21:00 и всегда готова помочь вам на каждом этапе.</li>
+        <li><strong>Технологии:</strong> Мы постоянно развиваем нашу платформу, внедряя новые технологии для вашего удобства, включая мобильное приложение для водителей и клиентов (в разработке).</li>
+        <li><strong>Покрытие:</strong> Осуществляем перевозки по Минску, областным центрам и всей территории Республики Беларусь.</li>
+    </ul>
+</section>
+
+<section>
+    <h2>Наша команда</h2>
+    <p>За успехом «ВезёмВсё» стоит команда увлеченных своим делом людей. Мы верим, что именно люди – главный актив любой компании.</p>
+    <div>
+        <strong>Владислав Гнидин</strong>
+        <span>Основатель и идейный вдохновитель. Увлечен созданием инновационных решений в логистике.</span>
     </div>
+    <div>
+        <strong>Гнидин Владислав</strong>
+        <span>Руководитель отдела по работе с клиентами. Убежден, что довольный клиент – лучшая реклама.</span>
+    </div>
+    <div>
+        <strong>Владислав Владиславович</strong>
+        <span>Технический директор. Отвечает за стабильность и развитие нашей платформы.</span>
+    </div>
+    <p><em>... и многие другие талантливые специалисты, от логистов до разработчиков, ежедневно работающие над улучшением нашего сервиса!</em></p>
+</section>
 
-    <footer>
-        <p><a href="{% url 'home_page' %}">Вернуться на главную страницу</a></p>
-        <p>&copy; {% now "Y" %} ВезёмВсё. Все права защищены.</p>
-    </footer>
-</body>
-</html>
+<section>
+    <h2>Наши ценности</h2>
+    <ul>
+        <li><strong>Клиент в центре всего:</strong> Мы стремимся превосходить ожидания наших клиентов.</li>
+        <li><strong>Ответственность и надежность:</strong> Мы отвечаем за каждый принятый заказ и доверенный нам груз.</li>
+        <li><strong>Инновации и развитие:</strong> Мы не стоим на месте и постоянно ищем новые пути для улучшения сервиса.</li>
+        <li><strong>Командная работа и уважение:</strong> Мы ценим вклад каждого сотрудника и строим работу на взаимном уважении.</li>
+        <li><strong>Честность и открытость:</strong> Мы ведем бизнес прозрачно и честно.</li>
+    </ul>
+</section>
+
+<section>
+    <h2>Свяжитесь с нами</h2>
+    <p>Мы всегда открыты для общения и готовы ответить на ваши вопросы. Вы можете связаться с нами через форму
+        обратной связи на сайте (если она есть), по электронной почте <a href="mailto:info@vezemvse.by">info@vezemvse.by</a> или по телефону <strong>+375 (29) 123-45-67</strong> (с 9:00 до 21:00).</p>
+    <p>Спасибо, что выбрали «ВезёмВсё»!</p>
+</section>
+{% endblock %}

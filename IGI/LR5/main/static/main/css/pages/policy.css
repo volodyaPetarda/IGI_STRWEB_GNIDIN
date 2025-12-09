@@ -1,0 +1,71 @@
+/* Page: Privacy Policy */
+
+h1 {
+	text-transform: uppercase;
+}
+/* 1) Highlight first letter of the very first paragraph (drop cap) */
+body[data-page="privacy"] #main-content p:first-of-type::first-letter {
+	font-size: 3.4em;
+	line-height: .95;
+	font-weight: 900;
+	float: left;
+	margin: .02em .32em 0 .02em;
+	color: #1a1a1a;
+	background: linear-gradient(180deg,#ffd54f,#ffb300);
+	padding: 4px 6px 2px;
+	border-radius: 6px;
+	box-shadow: 0 2px 0 rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* Optional: emphasize first line of the remaining paragraphs */
+body[data-page="privacy"] #main-content p:not(:first-of-type)::first-line {
+	letter-spacing: 0.3px;
+	font-variant: small-caps;
+	background: rgba(255,179,0,0.10);
+}
+
+/* 2) Add context before/after a marked fragment */
+body[data-page="privacy"] #main-content .with-context {
+	position: relative;
+	background: rgba(255,179,0,0.10);
+	padding: 0 2px;
+	border-radius: 3px;
+}
+body[data-page="privacy"] #main-content .with-context::before {
+	content: "⟪начало ";
+	color: #ff8f00;
+	font-weight: 800;
+	margin-right: 2px;
+}
+body[data-page="privacy"] #main-content .with-context::after {
+	content: " конец⟫";
+	color: #ff8f00;
+	font-weight: 800;
+	margin-left: 2px;
+}
+
+/* 3) Unicode markers via ::marker for one of the lists */
+body[data-page="privacy"] #main-content .policy-list--unicode { list-style: none; padding-left: 1.4em; }
+body[data-page="privacy"] #main-content .policy-list--unicode > li::marker { content: "§  "; color: #ffb300; font-weight: 800; }
+/* Fallback for older browsers: inject pseudo-bullet */
+@supports not (selector(::marker)) {
+	body[data-page="privacy"] #main-content .policy-list--unicode { list-style: none; }
+	body[data-page="privacy"] #main-content .policy-list--unicode > li { position: relative; padding-left: 1em; }
+		body[data-page="privacy"] #main-content .policy-list--unicode > li::before { content: "§"; position: absolute; left: 0; color: #ffb300; font-weight: 800; }
+}
+
+/* 4) Selection styling */
+body[data-page="privacy"] ::selection {
+	background: rgba(255, 235, 59, 0.85);
+	color: #161b22;
+}
+/* Firefox */
+body[data-page="privacy"] ::-moz-selection {
+	background: rgba(255, 235, 59, 0.85);
+	color: #161b22;
+}
+
+/* Minor typography tweaks */
+body[data-page="privacy"] #main-content {
+	line-height: 1.6;
+}

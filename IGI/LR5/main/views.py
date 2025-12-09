@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.contrib.auth.decorators import login_required
 from .forms import (
     CustomUserCreationForm,
@@ -18,7 +18,7 @@ from .forms import (
     DriverProfileUpdateForm, CustomerReviewForm
 )
 from .models import Client, Driver, Organization, Order, PromoCode, Review, Service, \
-    CargoType, News
+    CargoType, News, Partner, CompanyInfo, GlossaryItem, Contact
 from .utils import generate_user_types_pie_chart, generate_ages_histogram
 
 def register_driver(request):
@@ -59,15 +59,32 @@ def register_client(request):
         user_form = CustomUserCreationForm(request.POST)
         client_form = ClientRegistrationForm(request.POST)
         if user_form.is_valid() and client_form.is_valid():
+            # Use email from user_form, validate against Client uniqueness
+            email = user_form.cleaned_data.get('email')
+            if email and Client.objects.filter(email__iexact=email).exists():
+                user_form.add_error('email', 'Этот email уже зарегистрирован как клиент. Пожалуйста, используйте другой.')
+                messages.error(request, "Пожалуйста, исправьте ошибки в форме: Email уже зарегистрирован.")
+                context = {'user_form': user_form, 'client_form': client_form, 'title': 'Регистрация клиента'}
+                return render(request, 'logistics/register_client.html', context)
+
             try:
                 with transaction.atomic():
                     user = user_form.save()
                     client = client_form.save(commit=False)
                     client.user = user
-
+                    # Ensure client.email is filled from user_form
+                    client.email = email
                     client.save()
                 messages.success(request, 'Регистрация клиента прошла успешно! Теперь вы можете войти.')
                 return redirect('registration_success')
+            except IntegrityError as e:
+                # Fallback in case of race condition on Client.email
+                if 'main_client.email' in str(e):
+                    user_form.add_error('email', 'Этот email уже зарегистрирован как клиент. Пожалуйста, используйте другой.')
+                    messages.error(request, "Пожалуйста, исправьте ошибки в форме: Email уже зарегистрирован.")
+                    context = {'user_form': user_form, 'client_form': client_form, 'title': 'Регистрация клиента'}
+                    return render(request, 'logistics/register_client.html', context)
+                messages.error(request, f'Произошла ошибка при регистрации: {e}')
             except Exception as e:
                 messages.error(request, f'Произошла ошибка при регистрации: {e}')
         else:
@@ -126,9 +143,13 @@ def registration_success(request):
 
 def home_page(request):
     latest_news = News.objects.filter(is_published=True).order_by('-created_at').first()
+    partners = Partner.objects.all().order_by('name')
+    faq_items = GlossaryItem.objects.all().order_by('-added_at')
     context = {
         'title': 'Главная страница',
         'latest_news': latest_news,
+        'partners': partners,
+        'faq_items': faq_items,
     }
     return render(request, 'logistics/home.html', context)
 
@@ -263,7 +284,12 @@ def privacy_policy_view(request):
     return render(request, 'logistics/privacy_policy.html', context)
 
 def about_us_view(request):
-    context = {'title': 'О Нас'}
+    company = CompanyInfo.objects.first()
+    context = {
+        'title': 'О Нас',
+        'company': company,
+        'history_items': list(company.history_items.all()) if company else [],
+    }
     return render(request, 'logistics/about_us.html', context)
 
 @login_required
@@ -289,7 +315,7 @@ def create_order_view(request):
             return redirect('account_hub')
 
     if not profile:
-        messages.error(request, "Не удалось идентифицировать ваш профиль для создания заказа.")
+        messages.error(request, "Не удалось идентитифицировать ваш профиль для создания заказа.")
         return redirect('account_hub')
 
     if request.method == 'POST':
@@ -313,8 +339,24 @@ def create_order_view(request):
             order.status = 'pending'
             try:
                 order.save()
-                messages.success(request, f"Заказ #{order.id} успешно создан!")
-                return redirect('order_list')
+                # Add created order to session cart (quantity-aware, migrate if needed)
+                cart_data = request.session.get('cart_order_ids', {})
+                if isinstance(cart_data, list):
+                    migrated = {}
+                    for oid in cart_data:
+                        try:
+                            k = str(int(oid))
+                        except Exception:
+                            continue
+                        migrated[k] = migrated.get(k, 0) + 1
+                    cart_data = migrated
+                k = str(order.id)
+                cart_data[k] = int(cart_data.get(k, 0)) + 1
+                request.session['cart_order_ids'] = cart_data
+                request.session.modified = True
+
+                messages.success(request, f"Заказ #{order.id} успешно создан и добавлен в корзину.")
+                return redirect('cart')
             except ValidationError as ve:
                 error_message_str = "; ".join(ve.messages) if isinstance(ve.messages, list) else str(ve.messages)
                 messages.error(request, f"Ошибка при сохранении заказа: {error_message_str}")
@@ -371,11 +413,11 @@ def order_list_view(request):
     }
     return render(request, 'logistics/order_list.html', context)
 
+# Restore available_orders_list_view (used in urls.py)
 @login_required
 def available_orders_list_view(request):
     user = request.user
     try:
-
         driver_profile = Driver.objects.get(user=user)
     except Driver.DoesNotExist:
         messages.error(request, "Только водители могут просматривать доступные заказы.")
@@ -393,8 +435,218 @@ def available_orders_list_view(request):
     }
     return render(request, 'logistics/available_orders_list.html', context)
 
+# Cart: show, inc, dec, remove, clear
 @login_required
-@transaction.atomic
+def cart_view(request):
+    user = request.user
+    cart_data = request.session.get('cart_order_ids', {})
+
+    # migrate legacy list -> dict {order_id: qty}
+    if isinstance(cart_data, list):
+        migrated = {}
+        for oid in cart_data:
+            try:
+                k = str(int(oid))
+            except Exception:
+                continue
+            migrated[k] = migrated.get(k, 0) + 1
+        cart_data = migrated
+        request.session['cart_order_ids'] = cart_data
+        request.session.modified = True
+
+    # detect owner
+    owner_client = None
+    owner_org = None
+    try:
+        owner_client = Client.objects.get(user=user)
+    except Client.DoesNotExist:
+        try:
+            owner_org = Organization.objects.get(user=user)
+        except Organization.DoesNotExist:
+            owner_client = None
+            owner_org = None
+
+    if not (owner_client or owner_org):
+        messages.error(request, "Корзина доступна только клиентам и организациям.")
+        return redirect('account_hub')
+
+    # handle actions
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        order_id_raw = request.POST.get('order_id', '')
+        try:
+            order_id_int = int(order_id_raw)
+            order_key = str(order_id_int)
+        except (TypeError, ValueError):
+            order_key = None
+
+        if action == 'inc' and order_key:
+            cart_data[order_key] = int(cart_data.get(order_key, 0)) + 1
+            request.session['cart_order_ids'] = cart_data
+            request.session.modified = True
+            return redirect('cart')
+        elif action == 'dec' and order_key:
+            current = int(cart_data.get(order_key, 0))
+            if current <= 1:
+                cart_data.pop(order_key, None)
+            else:
+                cart_data[order_key] = current - 1
+            request.session['cart_order_ids'] = cart_data
+            request.session.modified = True
+            return redirect('cart')
+        elif action == 'remove' and order_key:
+            cart_data.pop(order_key, None)
+            request.session['cart_order_ids'] = cart_data
+            request.session.modified = True
+            return redirect('cart')
+        elif action == 'clear':
+            request.session['cart_order_ids'] = {}
+            request.session.modified = True
+            return redirect('cart')
+
+    # build items list limited to current owner
+    id_list = [int(k) for k in cart_data.keys()] if cart_data else []
+    qs = Order.objects.filter(id__in=id_list)
+    if owner_client:
+        qs = qs.filter(client=owner_client)
+    else:
+        qs = qs.filter(organization=owner_org)
+
+    orders_by_id = {o.id: o for o in qs}
+    cart_items = []
+    subtotal = Decimal('0.00')
+    for k, qty in cart_data.items():
+        try:
+            oid = int(k)
+        except Exception:
+            continue
+        order = orders_by_id.get(oid)
+        if not order:
+            continue
+        q = int(qty) if qty else 0
+        if q <= 0:
+            continue
+        line_total = (order.total_cost or Decimal('0.00')) * q
+        subtotal += line_total
+        cart_items.append({
+            'order': order,
+            'qty': q,
+            'line_total': line_total,
+        })
+
+    context = {
+        'title': 'Моя корзина',
+        'cart_items': cart_items,
+        'cart_subtotal': subtotal,
+    }
+    return render(request, 'logistics/cart.html', context)
+
+# Payment: apply promocode and confirm
+@login_required
+def payment_view(request):
+    user = request.user
+    cart_data = request.session.get('cart_order_ids', {})
+    if isinstance(cart_data, list):
+        migrated = {}
+        for oid in cart_data:
+            try:
+                k = str(int(oid))
+            except Exception:
+                continue
+            migrated[k] = migrated.get(k, 0) + 1
+        cart_data = migrated
+        request.session['cart_order_ids'] = cart_data
+        request.session.modified = True
+
+    # detect owner
+    owner_client = None
+    owner_org = None
+    try:
+        owner_client = Client.objects.get(user=user)
+    except Client.DoesNotExist:
+        try:
+            owner_org = Organization.objects.get(user=user)
+        except Organization.DoesNotExist:
+            owner_client = None
+            owner_org = None
+
+    if not (owner_client or owner_org):
+        messages.error(request, "Оплата доступна только клиентам и организациям.")
+        return redirect('account_hub')
+
+    id_list = [int(k) for k in cart_data.keys()] if cart_data else []
+    qs = Order.objects.filter(id__in=id_list)
+    if owner_client:
+        qs = qs.filter(client=owner_client)
+    else:
+        qs = qs.filter(organization=owner_org)
+
+    orders_by_id = {o.id: o for o in qs}
+    orders_in_cart = []
+    subtotal = Decimal('0.00')
+    for k, qty in cart_data.items():
+        try:
+            oid = int(k)
+        except Exception:
+            continue
+        order = orders_by_id.get(oid)
+        if not order:
+            continue
+        q = int(qty) if qty else 0
+        if q <= 0:
+            continue
+        line_total = (order.total_cost or Decimal('0.00')) * q
+        subtotal += line_total
+        orders_in_cart.append(order)
+
+    promo_code_input = request.POST.get('promo_code') if request.method == 'POST' else request.GET.get('promo_code')
+    applied_promo = None
+    discount_amount = Decimal('0.00')
+
+    if promo_code_input:
+        try:
+            promo = PromoCode.objects.get(code__iexact=promo_code_input, is_active=True)
+            if promo.is_currently_active():
+                applied_promo = promo
+                if promo.discount_type == 'percentage':
+                    discount_amount = (subtotal * (promo.discount_value or Decimal('0'))) / Decimal('100')
+                else:
+                    discount_amount = min((promo.discount_value or Decimal('0')), subtotal)
+                discount_amount = discount_amount.quantize(Decimal('0.01'))
+                messages.success(request, f"Промокод {promo.code} применен.")
+            else:
+                messages.warning(request, "Этот промокод сейчас неактивен.")
+        except PromoCode.DoesNotExist:
+            messages.error(request, "Промокод не найден.")
+
+    total_due = (subtotal - discount_amount).quantize(Decimal('0.01')) if subtotal else Decimal('0.00')
+
+    if request.method == 'POST' and request.POST.get('action') == 'pay':
+        if not orders_in_cart:
+            messages.warning(request, "Корзина пуста. Добавьте заказы перед оплатой.")
+            return redirect('cart')
+        # mark unique orders as confirmed (оплата симулируется)
+        for o in orders_in_cart:
+            if o.status == 'pending':
+                o.status = 'confirmed'
+                o.save()
+        request.session['cart_order_ids'] = {}
+        request.session.modified = True
+        messages.success(request, f"Оплата прошла успешно. Оплачено: {total_due} руб.")
+        return redirect('order_list')
+
+    context = {
+        'title': 'Оплата заказов',
+        'cart_orders': orders_in_cart,
+        'cart_subtotal': subtotal,
+        'applied_promo': applied_promo,
+        'promo_code_input': promo_code_input or '',
+        'discount_amount': discount_amount,
+        'total_due': total_due,
+    }
+    return render(request, 'logistics/payment.html', context)
+
+@login_required
 def driver_take_order_view(request, order_id):
     user = request.user
     try:
@@ -607,6 +859,14 @@ def news_detail_view(request, news_id):
     }
     return render(request, 'logistics/news_detail.html', context)
 
+def services_catalog_view(request):
+    services = Service.objects.all().order_by('name')
+    context = {
+        'title': 'Каталог услуг',
+        'services': services,
+    }
+    return render(request, 'logistics/services_catalog.html', context)
+
 def random_fact_pet_view(request):
     pet_image_url = None
     fact_text = None
@@ -670,3 +930,19 @@ def site_statistics_view(request):
     }
 
     return render(request, 'logistics/site_statistics.html', context)
+
+def contacts(request):
+    staff = Contact.objects.filter(is_active=True).order_by('sort_order', 'full_name')
+    return render(request, 'logistics/contacts.html', {
+        'title': 'Контакты',
+        'staff': staff,
+    })
+
+def glossary_view(request):
+    """Словарь терминов и FAQ: список вопросов с датой и раскрывающимся ответом."""
+    items = GlossaryItem.objects.all().order_by('-added_at')
+    context = {
+        'title': 'Словарь и FAQ',
+        'items': items,
+    }
+    return render(request, 'logistics/glossary.html', context)

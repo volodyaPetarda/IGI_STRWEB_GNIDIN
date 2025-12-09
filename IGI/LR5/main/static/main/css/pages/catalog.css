@@ -1,0 +1,52 @@
+/* Page: Catalog — CSS Grid Layout */
+
+/* Container */
+#services-catalog { margin-top: var(--space-4); }
+#services-catalog > h1 { margin-bottom: var(--space-4); }
+
+
+.catalog-grid {
+	/* Grid with responsive columns */
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: var(--space-5);
+	list-style: none;
+	padding: 0;
+	margin: var(--space-4) 0;
+}
+
+/* Fallback: if Grid unsupported, use flex wrap */
+@supports not (display: grid) {
+	.catalog-grid { display: flex; flex-wrap: wrap; gap: var(--space-5); }
+	.catalog-grid > li { flex: 1 1 240px; }
+}
+
+/* Card presentation */
+.catalog-card .card {
+	height: 100%;
+	display: grid;
+	grid-template-rows: auto 1fr auto auto;
+	gap: var(--space-3);
+}
+
+.catalog-card h3 { margin: 0; font-size: var(--fs-5); }
+.catalog-desc { color: var(--color-surface); opacity: .9; }
+
+/* Clamp description to ~3 lines */
+.catalog-desc {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.catalog-price { margin-top: auto; font-weight: 600; }
+.catalog-price data { font-variant-numeric: tabular-nums; }
+
+.catalog-cta { margin-top: var(--space-2); }
+.catalog-cta .btn { width: 100%; justify-content: center; }
+
+/* Subtle hover lift */
+.catalog-card .card { transition: transform .15s ease, box-shadow .2s ease; }
+.catalog-card .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }

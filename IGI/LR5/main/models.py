@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import re
+from urllib.parse import urlparse, parse_qs
 
 def validate_belarusian_phone_number(value):
     pattern = re.compile(r'^\+375\s\((17|25|29|33|44)\)\s\d{3}-\d{2}-\d{2}$')
@@ -256,3 +257,124 @@ class News(models.Model):
 
     def __str__(self):
         return self.title
+
+class Partner(models.Model):
+    name = models.CharField(max_length=200, verbose_name="Название")
+    website_url = models.URLField(verbose_name="Ссылка на сайт")
+    logo = models.ImageField(upload_to='partners/', verbose_name="Логотип")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+
+    class Meta:
+        verbose_name = "Партнер"
+        verbose_name_plural = "Партнеры"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+class CompanyInfo(models.Model):
+    """О компании"""
+    company_name = models.CharField(max_length=255, verbose_name="Название компании", default="ВезёмВсё")
+    description = models.TextField(verbose_name="Информация о компании")
+    logo = models.ImageField(upload_to='company/', null=True, blank=True, verbose_name="Логотип")
+    intro_image = models.ImageField(upload_to='company/', null=True, blank=True, verbose_name="Изображение (обложка)")
+    video_url = models.URLField(null=True, blank=True, verbose_name="Видео (URL)")
+    video_file = models.FileField(upload_to='company/videos/', null=True, blank=True, verbose_name="Видео (файл)")
+    requisites = models.TextField(verbose_name="Реквизиты")
+    certificate_text = models.TextField(verbose_name="Сертификат (текст)")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "О компании"
+        verbose_name_plural = "О компании"
+
+    def __str__(self):
+        return self.company_name
+
+    @property
+    def video_embed_src(self):
+        url = self.video_url
+        if not url:
+            return None
+        try:
+            p = urlparse(url)
+            host = p.netloc.lower()
+            path = p.path or ""
+            if "youtube.com" in host or "youtu.be" in host:
+                # already embed
+                if "/embed/" in path:
+                    return url
+                # shorts
+                if path.startswith("/shorts/"):
+                    parts = [s for s in path.split("/") if s]
+                    vid = parts[1] if len(parts) > 1 else None
+                    if vid:
+                        return f"https://www.youtube.com/embed/{vid}"
+                # youtu.be short link
+                if "youtu.be" in host:
+                    vid = path.lstrip("/")
+                    if vid:
+                        return f"https://www.youtube.com/embed/{vid}"
+                # watch?v=...
+                q = parse_qs(p.query or "")
+                vid = q.get("v", [None])[0]
+                if vid:
+                    return f"https://www.youtube.com/embed/{vid}"
+            if "vimeo.com" in host:
+                if host.startswith("player."):
+                    return url
+                parts = [s for s in path.split("/") if s]
+                if parts and parts[0].isdigit():
+                    return f"https://player.vimeo.com/video/{parts[0]}"
+            return url
+        except Exception:
+            return url
+
+class CompanyHistoryItem(models.Model):
+    company = models.ForeignKey(CompanyInfo, on_delete=models.CASCADE, related_name='history_items', verbose_name="Компания")
+    year = models.PositiveIntegerField(verbose_name="Год")
+    text = models.TextField(verbose_name="Событие/описание")
+
+    class Meta:
+        verbose_name = "История компании (запись)"
+        verbose_name_plural = "История компании (по годам)"
+        ordering = ['-year']
+
+    def __str__(self):
+        return f"{self.year}: {self.company.company_name}"
+
+class GlossaryItem(models.Model):
+    question = models.CharField(max_length=255, verbose_name="Термин / Вопрос")
+    answer = models.TextField(verbose_name="Определение / Ответ")
+    added_at = models.DateTimeField(default=timezone.now, verbose_name="Дата добавления")
+
+    class Meta:
+        verbose_name = "Словарь / FAQ — запись"
+        verbose_name_plural = "Словарь / FAQ — записи"
+        ordering = ['-added_at']
+
+    def __str__(self):
+        return self.question
+
+class Contact(models.Model):
+    full_name = models.CharField(max_length=150, verbose_name="ФИО")
+    position = models.CharField(max_length=150, verbose_name="Должность")
+    email = models.EmailField(blank=True, verbose_name="Email")
+    phone_number = models.CharField(
+        max_length=20, blank=True, verbose_name="Телефон",
+        validators=[validate_belarusian_phone_number]
+    )
+    photo = models.ImageField(upload_to='contacts/', null=True, blank=True, verbose_name="Фото")
+    responsibilities = models.TextField(blank=True, verbose_name="Обязанности / Описание работ")
+    is_active = models.BooleanField(default=True, verbose_name="Показывать на странице")
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="Порядок сортировки")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Контакт"
+        verbose_name_plural = "Контакты"
+        ordering = ['sort_order', 'full_name']
+
+    def __str__(self):
+        return self.full_name

@@ -4,58 +4,93 @@
 
 {% block title %}{{ title }} - ВезёмВсё{% endblock %}
 
-{% block content %}
-<div>
-    <article>
-        <h1>{{ news_item.title }}</h1>
-        <p>
-            <small>
-                Опубликовано (UTC): {{ news_item.created_at|timezone:"UTC"|date:"d/m/Y" }}
-                {% if news_item.created_at|date:"H:i" != "00:00" %}
-                ({{ news_item.created_at|timezone:"UTC"|date:"H:i" }})
-                {% endif %}
-                <br>
-                Опубликовано ({{ user_timezone_str_ctx }}): {{ news_item.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
-                {% if news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %}
-                ({{ news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" }})
-                {% endif %}
-            </small>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/news_detail.css' %}">
+{% endblock %}
 
-            {% if news_item.updated_at|date:"YmdHis" != news_item.created_at|date:"YmdHis" %}
-                <span>|</span>
+{% block head_extra %}
+    {{ block.super }}
+    <meta name="description" content="{{ news_item.short_description|default:news_item.full_description|striptags|truncatechars:160 }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ news_item.title }}">
+    {% if news_item.image %}<meta property="og:image" content="{{ news_item.image.url }}">{% endif %}
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": {{ news_item.title|escapejs|safe }},
+      "datePublished": "{{ news_item.created_at|date:'c' }}",
+      "dateModified": "{{ news_item.updated_at|date:'c' }}",
+      {% if news_item.image %}"image": ["{{ news_item.image.url }}"],{% endif %}
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "ВезёмВсё",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ request.scheme }}://{{ request.get_host }}/media/logo.jpg"
+        }
+      }
+    }
+    </script>
+{% endblock %}
+
+{% block content %}
+<section id="news-detail">
+    <article>
+        <header>
+            <h1>{{ news_item.title }}</h1>
+            <p>
                 <small>
-                    Обновлено (UTC): {{ news_item.updated_at|timezone:"UTC"|date:"d/m/Y" }}
-                    {% if news_item.updated_at|timezone:"UTC"|date:"H:i" != "00:00" %}
-                        ({{ news_item.updated_at|timezone:"UTC"|date:"H:i" }})
-                    {% endif %}
+                    <time datetime="{{ news_item.created_at|timezone:'UTC'|date:'c' }}">
+                        Опубликовано (UTC): {{ news_item.created_at|timezone:"UTC"|date:"d/m/Y" }}
+                        {% if news_item.created_at|date:"H:i" != "00:00" %} ({{ news_item.created_at|timezone:"UTC"|date:"H:i" }}){% endif %}
+                    </time>
                     <br>
-                    Обновлено ({{ user_timezone_str_ctx }}): {{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
-                    {% if news_item.updated_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %}
-                        ({{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"H:i" }})
-                    {% endif %}
+                    <time datetime="{{ news_item.created_at|timezone:user_timezone_str_ctx|date:'c' }}">
+                        Опубликовано ({{ user_timezone_str_ctx }}): {{ news_item.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
+                        {% if news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %} ({{ news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" }}){% endif %}
+                    </time>
                 </small>
-            {% endif %}
-        </p>
+
+                {% if news_item.updated_at|date:"YmdHis" != news_item.created_at|date:"YmdHis" %}
+                    <span>|</span>
+                    <small>
+                        <time datetime="{{ news_item.updated_at|timezone:'UTC'|date:'c' }}">
+                            Обновлено (UTC): {{ news_item.updated_at|timezone:"UTC"|date:"d/m/Y" }}
+                            {% if news_item.updated_at|timezone:"UTC"|date:"H:i" != "00:00" %} ({{ news_item.updated_at|timezone:"UTC"|date:"H:i" }}){% endif %}
+                        </time>
+                        <br>
+                        <time datetime="{{ news_item.updated_at|timezone:user_timezone_str_ctx|date:'c' }}">
+                            Обновлено ({{ user_timezone_str_ctx }}): {{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
+                            {% if news_item.updated_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %} ({{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"H:i" }}){% endif %}
+                        </time>
+                    </small>
+                {% endif %}
+            </p>
+        </header>
 
         {% if news_item.image %}
-            <div>
+            <figure id="news-figure">
                 <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
-            </div>
+                <figcaption><cite>{{ news_item.title }}</cite></figcaption>
+            </figure>
         {% endif %}
 
-        <div>
+        <div class="article-body">
             {{ news_item.full_description|linebreaksbr }}
         </div>
+
+        <footer>
+            <nav aria-label="Другие страницы">
+                <a href="{% url 'news_list' %}">Все новости</a>
+                <a href="{% url 'home_page' %}">На главную</a>
+            </nav>
+        </footer>
     </article>
-
-    <div>
-        <a href="{% url 'news_list' %}">
-             Все новости
-        </a>
-        <a href="{% url 'home_page' %}">
-             На главную
-        </a>
-    </div>
-</div>
-
+</section>
 {% endblock %}

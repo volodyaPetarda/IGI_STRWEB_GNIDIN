@@ -1,0 +1,202 @@
+/* Animations scaffold */
+
+@keyframes floatPulse { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes spin { to { transform: rotate(1turn); } }
+
+/* Example utility classes (to be used later) */
+.animate-float { animation: floatPulse 3s ease-in-out infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+
+/* ==========================
+	 Preloader: 3x3 ring with one empty cell — only ONE square moves at a time
+	 ========================== */
+.preloader-squares { position: relative; display: inline-block; padding: 10px; border-radius: 8px; background: #12171c; box-shadow: var(--shadow-1); }
+.preloader-squares { --cell: 24px; }
+.preloader-squares .field { position: relative; width: calc(var(--cell) * 3); height: calc(var(--cell) * 3); }
+.preloader-squares .sq { position: absolute; top: 0; left: 0; width: 12px; height: 12px; background: #fff; border-radius: 2px; box-shadow: 0 0 6px rgba(255,255,255,.35); animation-duration: 4s; animation-iteration-count: infinite; animation-timing-function: linear; will-change: transform; }
+
+/* Ring coordinates (P0..P7):
+	 P0 (0,0)   P1 (1,0)   P2 (2,0)
+	 P7 (0,1)   [center]   P3 (2,1)
+	 P6 (0,2)   P5 (1,2)   P4 (2,2)
+	 Initial empty = P0. 7 squares occupy P1..P7. */
+
+/* Square 1: P1 -> P0 at 12.5% */
+.preloader-squares .sq:nth-child(1) { animation-name: sqMove1; }
+@keyframes sqMove1 {
+	0%, 8.99% { transform: translate(var(--cell), 0); }
+	12.5%, 100% { transform: translate(0, 0); }
+}
+
+/* Square 2: P2 -> P1 at 25% */
+.preloader-squares .sq:nth-child(2) { animation-name: sqMove2; }
+@keyframes sqMove2 {
+	0%, 20.99% { transform: translate(calc(var(--cell) * 2), 0); }
+	25%, 100% { transform: translate(var(--cell), 0); }
+}
+
+/* Square 3: P3 -> P2 at 37.5% */
+.preloader-squares .sq:nth-child(3) { animation-name: sqMove3; }
+@keyframes sqMove3 {
+	0%, 33.99% { transform: translate(calc(var(--cell) * 2), var(--cell)); }
+	37.5%, 100% { transform: translate(calc(var(--cell) * 2), 0); }
+}
+
+/* Square 4: P4 -> P3 at 50% */
+.preloader-squares .sq:nth-child(4) { animation-name: sqMove4; }
+@keyframes sqMove4 {
+	0%, 45.99% { transform: translate(calc(var(--cell) * 2), calc(var(--cell) * 2)); }
+	50%, 100% { transform: translate(calc(var(--cell) * 2), var(--cell)); }
+}
+
+/* Square 5: P5 -> P4 at 62.5% */
+.preloader-squares .sq:nth-child(5) { animation-name: sqMove5; }
+@keyframes sqMove5 {
+	0%, 58.99% { transform: translate(var(--cell), calc(var(--cell) * 2)); }
+	62.5%, 100% { transform: translate(calc(var(--cell) * 2), calc(var(--cell) * 2)); }
+}
+
+/* Square 6: P6 -> P5 at 75% */
+.preloader-squares .sq:nth-child(6) { animation-name: sqMove6; }
+@keyframes sqMove6 {
+	0%, 70.99% { transform: translate(0, calc(var(--cell) * 2)); }
+	75%, 100% { transform: translate(var(--cell), calc(var(--cell) * 2)); }
+}
+
+/* Square 7: P7 -> P6 at 87.5% */
+.preloader-squares .sq:nth-child(7) { animation-name: sqMove7; }
+@keyframes sqMove7 {
+	0%, 83.99% { transform: translate(0, var(--cell)); }
+	87.5%, 100% { transform: translate(0, calc(var(--cell) * 2)); }
+}
+
+.preloader-squares figcaption { margin-top: 8px; text-align: center; color: #e6e6e6; font-size: var(--fs-2); }
+
+/* ==========================
+	Hero: Truck on a winding road
+	- Truck follows a CSS motion path
+	- Wheels spin during drive
+	- Cargo bounces
+	- Splashes appear under wheels
+	- Brand fades in and stays visible
+	========================== */
+.truck-hero { position: relative; width: 840px; height: 240px; margin-inline: auto; border-radius: 12px; overflow: hidden; background:
+	linear-gradient(#0e1922, #0b1218) 0 0 / 100% 70% no-repeat,
+	linear-gradient(#0a0f14, #0a0f14) 0 100% / 100% 30% no-repeat; box-shadow: var(--shadow-2, 0 10px 30px rgba(0,0,0,.35)); }
+.truck-hero__road { position: absolute; inset: 0; pointer-events: none; }
+
+/* Truck shape */
+.truck { position: absolute; top: 0; left: 0; width: 120px; height: 60px; z-index: 2; will-change: transform, offset-distance; }
+.truck__body { position: absolute; left: 0; bottom: 12px; height: 36px; width: 110px; display: grid; grid-template-columns: 44px 66px; align-items: end; }
+.truck__cabin { height: 34px; width: 44px; background: linear-gradient(180deg,#2e8ece,#17619b); border-radius: 6px 6px 4px 4px; box-shadow: inset 0 2px 0 rgba(255,255,255,.25); position: relative; }
+.truck__cabin::after { content: ""; position: absolute; right: 6px; top: 6px; width: 20px; height: 14px; background: linear-gradient(180deg,#cfe8ff,#6fb3e6); border-radius: 2px; box-shadow: inset 0 0 4px rgba(0,0,0,.25); }
+/* Headlight glow */
+.truck__cabin::before { content: ""; position: absolute; right: -6px; bottom: 8px; width: 10px; height: 6px; background: radial-gradient(10px 6px at 0% 50%, rgba(255,232,150,.9), rgba(255,232,150,.2) 60%, transparent 70%); filter: blur(.6px); }
+.truck__bed { height: 28px; width: 66px; background: linear-gradient(180deg,#444,#2a2a2a); border-radius: 4px; position: relative; box-shadow: inset 0 2px 0 rgba(255,255,255,.15); }
+.truck__wheel { position: absolute; bottom: 0; width: 18px; height: 18px; background: radial-gradient(circle at 50% 50%, #222 35%, #000 36% 100%); border-radius: 50%; box-shadow: inset 0 0 0 3px #444, inset 0 0 0 6px #222, 0 2px 0 rgba(255,255,255,.08); }
+.truck__wheel--front { left: 32px; }
+.truck__wheel--rear { left: 86px; }
+/* Wheel hub */
+.truck__wheel::after { content: ""; position: absolute; inset: 0; margin: auto; width: 4px; height: 4px; border-radius: 50%; background: #ddd; box-shadow: 6px 0 0 #bbb, -6px 0 0 #bbb, 0 6px 0 #bbb, 0 -6px 0 #bbb; }
+
+/* Shadow under truck */
+.truck__shadow { position: absolute; left: 30px; bottom: 2px; width: 70px; height: 10px; background: radial-gradient(35px 5px at 50% 50%, rgba(0,0,0,.45), rgba(0,0,0,0)); filter: blur(2px); opacity: .7; }
+
+/* Cargo */
+.cargo { position: absolute; bottom: 8px; width: 12px; height: 12px; background: #d9a441; border-radius: 2px; box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.cargo--1 { left: 10px; }
+.cargo--2 { left: 26px; height: 10px; background: #b46d3a; }
+.cargo--3 { left: 42px; width: 10px; background: #c7bd7a; }
+
+/* Splashes */
+.splash { position: absolute; width: 6px; height: 6px; background: rgba(116, 184, 255, 0.85); border-radius: 50%; bottom: 6px; filter: blur(.3px); opacity: 0; }
+.splash--front { left: 28px; }
+.splash--rear { left: 84px; }
+
+/* Motion path: prefer CSS motion path; fallback to keyframes translate */
+@supports (offset-path: path("M0,0 L1,1")) or (-webkit-offset-path: path("M0,0 L1,1")) {
+	/* Pixel-perfect path matching the SVG road (container fixed at 840x240) */
+	.truck {
+		offset-path: path("M20,190 C 160,120 300,220 420,170 S 700,160 820,195");
+		-webkit-offset-path: path("M20,190 C 160,120 300,220 420,170 S 700,160 820,195");
+		offset-rotate: auto; -webkit-offset-rotate: auto;
+		offset-anchor: 50% 85%;
+	}
+	.truck { animation: truckDrive 6s ease-in-out 0.2s 1 both; }
+}
+
+@keyframes truckDrive {
+	0% { offset-distance: 0%; -webkit-offset-distance: 0%; }
+	100% { offset-distance: 100%; -webkit-offset-distance: 100%; }
+}
+
+/* Fallback trajectory (approximate) */
+@supports not (offset-path: path("M0,0 L1,1")) {
+	.truck { left: 20px; top: 150px; animation: truckFallback 6s ease-in-out 0.2s 1 both; }
+	@keyframes truckFallback {
+		0%   { transform: translate(0px, 40px) rotate(0deg); }
+		20%  { transform: translate(160px, -30px) rotate(-10deg); }
+		40%  { transform: translate(300px, 30px) rotate(8deg); }
+		60%  { transform: translate(440px, -10px) rotate(-6deg); }
+		80%  { transform: translate(650px, -5px) rotate(4deg); }
+		100% { transform: translate(800px, 20px) rotate(0deg); }
+	}
+}
+
+/* Wheels spin during the drive (finite turns to stop when truck stops) */
+.truck__wheel { animation: wheelSpin 6s linear 0.2s 1 both; transform-origin: 50% 50%; }
+@keyframes wheelSpin { from { transform: rotate(0turn); } to { transform: rotate(6turn); } }
+
+/* Cargo bouncing */
+.cargo--1 { animation: cargoBounce 6s ease-in-out 0.2s 1 both; }
+.cargo--2 { animation: cargoBounce 6s ease-in-out 0.3s 1 both; }
+.cargo--3 { animation: cargoBounce 6s ease-in-out 0.4s 1 both; }
+@keyframes cargoBounce {
+	0%, 10% { transform: translateY(0) rotate(0deg); }
+	15% { transform: translateY(-6px) rotate(-4deg); }
+	22% { transform: translateY(0) rotate(0deg); }
+	38% { transform: translateY(-5px) rotate(3deg); }
+	45% { transform: translateY(0) rotate(0deg); }
+	62% { transform: translateY(-7px) rotate(-5deg); }
+	70% { transform: translateY(0) rotate(0deg); }
+	86% { transform: translateY(-5px) rotate(4deg); }
+	100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Subtle suspension bounce for the truck body */
+.truck__body { animation: bodyHeave 6s ease-in-out 0.2s 1 both; }
+@keyframes bodyHeave {
+	0%, 8% { transform: translateY(0); }
+	12% { transform: translateY(-2px); }
+	18% { transform: translateY(0); }
+	35% { transform: translateY(-1.5px); }
+	42% { transform: translateY(0); }
+	60% { transform: translateY(-2.2px); }
+	68% { transform: translateY(0); }
+	82% { transform: translateY(-1.2px); }
+	100% { transform: translateY(0); }
+}
+
+/* Splashes sequencing */
+.splash--front { animation: splashBurst 6s ease-out 0.2s 1 both; }
+.splash--rear  { animation: splashBurst 6s ease-out 0.3s 1 both; }
+@keyframes splashBurst {
+	0%, 14% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+	15% { opacity: .9; transform: translate(6px, -6px) scale(1); }
+	22% { opacity: 0; transform: translate(12px, -10px) scale(1.2); }
+	38% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+	40% { opacity: .9; transform: translate(6px, -6px) scale(1); }
+	48% { opacity: 0; transform: translate(12px, -10px) scale(1.2); }
+	62% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+	65% { opacity: .9; transform: translate(6px, -6px) scale(1); }
+	72% { opacity: 0; transform: translate(12px, -10px) scale(1.2); }
+	86% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+	88% { opacity: .9; transform: translate(6px, -6px) scale(1); }
+	95% { opacity: 0; transform: translate(12px, -10px) scale(1.2); }
+	100% { opacity: 0; }
+}
+
+/* Brand reveal */
+.brand-reveal { position: absolute; inset: auto 0 14px 0; margin-inline: auto; width: max-content; padding: 8px 14px; border-radius: 8px; font-family: var(--font-serif); font-size: clamp(20px, 4vw, 40px); font-weight: 800; letter-spacing: .02em; font-kerning: normal; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,.45); opacity: 0; transform: translateY(10px) scale(.98); backdrop-filter: blur(2px); background: linear-gradient(180deg, rgba(12,16,20,.25), rgba(12,16,20,.45)); }
+.brand-reveal { animation: brandFadeIn .9s ease-out 6.2s 1 forwards; }
+@keyframes brandFadeIn { to { opacity: 1; transform: translateY(0) scale(1); } }

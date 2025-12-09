@@ -1,0 +1,151 @@
+/* Page: News List — multi-column with positioned last item */
+
+#news-list {
+    column-count: 2;
+    column-gap: 2rem;
+    padding: 0;
+}
+
+.news-card {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, .04);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-2);
+}
+
+.news-card figure {
+    margin: 0;
+    height: 200px;
+}
+
+.news-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.news-card .card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0; /* Prevents overflow issues in flex children */
+}
+
+.news-card .card-content h2 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+    min-width: 0;
+}
+
+.news-card .card-content h2 a {
+    display: block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    color: var(--color-surface);
+    font-weight: 600;
+}
+
+.news-card .card-content h2 a:hover {
+    color: var(--color-accent);
+}
+
+.news-card .card-content .description {
+    --lines: 3;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--lines);
+    line-clamp: var(--lines);
+    line-height: 1.5;
+    max-height: calc(1.5em * var(--lines));
+    white-space: normal; /* Override single-line from previous version */
+}
+
+.news-card .card-content .read-more-btn {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-primary);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.news-card .card-content .read-more-btn:hover {
+    background-color: #1976d2; /* Darker primary */
+    color: #fff;
+}
+
+/* --- Special Positioning for Last News Card --- */
+
+#news-list .is-last-card {
+    position: relative;
+    top: 100px;
+    left: -100px;
+    z-index: 1;
+    column-span: all;
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    border: 2px dotted red;
+}
+
+#news-list .is-last-card figure {
+    height: auto; /* Override fixed height */
+}
+
+#news-list .is-last-card .card-content h2 {
+    font-size: 1.75rem;
+}
+
+#news-list .is-last-card .card-content h2 a {
+    white-space: normal; /* Allow title to wrap */
+    overflow: visible;
+    text-overflow: clip;
+}
+
+#news-list .is-last-card .card-content .description {
+    --lines: 5;
+    -webkit-line-clamp: var(--lines);
+    line-clamp: var(--lines);
+    max-height: calc(1.5em * var(--lines));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #news-list {
+        column-count: 1;
+    }
+
+    #news-list .is-last-card {
+        grid-template-columns: 1fr;
+        left: 0;
+        top: 40px;
+        margin-bottom: 40px;
+    }
+}
+
+

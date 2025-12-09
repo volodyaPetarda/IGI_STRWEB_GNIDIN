@@ -1,87 +1,516 @@
+{% extends "logistics/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - ВезёмВсё</title>
 
-</head>
-<body>
-    <nav>
-        <a href="{% url 'home_page' %}">ВезёмВсё</a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'account_hub' %}">Кабинет</a>
-            <a href="{% url 'news_list' %}">Новости</a>
-            <a href="{% url 'promocodes' %}">Акции</a>
-            <a href="{% url 'random_fact_pet' %}">Развлечения</a>
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit">Выйти ({{ user.username }})</button>
-            </form>
-        {% else %}
-            <a href="{% url 'login' %}">Войти</a>
-            <a href="#registration-options">Регистрация</a>
-            <a href="{% url 'news_list' %}">Новости</a>
-            <a href="{% url 'promocodes' %}">Акции</a>
-            <a href="{% url 'random_fact_pet' %}">Развлечения</a>
-        {% endif %}
-    </nav>
+{% block title %}{{ title|default:"Главная" }}{% endblock %}
 
-    <div>
-        <h1>Добро пожаловать в «ВезёмВсё»!</h1>
-        <p>Ваш надежный сервис для быстрой и удобной организации грузоперевозок. Мы соединяем клиентов с проверенными водителями и транспортными компаниями.</p>
+{% block head_extra %}
+    {{ block.super }}
+    <!-- Page-specific CSS for Home -->
+    <link rel="stylesheet" href="{% static 'main/css/pages/home.css' %}">
+    <meta name="description" content="ВезёмВсё — сервис грузоперевозок: оформление заказов, надежные водители и компании, акции и новости.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ title|default:'Главная' }} - ВезёмВсё">
+    <meta property="og:image" content="/media/logo.jpg">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}">
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@type":"Organization",
+      "name":"ВезёмВсё",
+      "url":"{{ request.scheme }}://{{ request.get_host }}",
+      "logo":"{{ request.scheme }}://{{ request.get_host }}/media/logo.jpg",
+      "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"info@vezemvse.by","telephone":"+375 (29) 123-45-67","areaServed":"BY","availableLanguage":["ru"]}]
+    }
+    </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","name":"ВезёмВсё","url":"{{ request.scheme }}://{{ request.get_host }}"}
+    </script>
+{% endblock %}
 
-        {% if user.is_authenticated %}
-            <p>Вы вошли как <strong>{{ user.username }}</strong>.</p>
-            <p><a href="{% url 'account_hub' %}">Перейти в мой кабинет</a></p>
-        {% else %}
-            <p>Войдите в систему или зарегистрируйтесь, чтобы разместить заказ или предложить свои услуги перевозчика.</p>
-            <div id="registration-options">
-                <a href="{% url 'register_driver' %}">Я Водитель</a>
-                <a href="{% url 'register_client' %}">Я Клиент</a>
-                <a href="{% url 'register_organization' %}">Я Организация</a>
-            </div>
-        {% endif %}
+{% block content %}
+<span id="top" aria-hidden="true"></span>
+<h1>Добро пожаловать в «ВезёмВсё»!</h1>
 
+<!-- Hero: Truck on a winding road (CSS-only animation) -->
+<section id="truck-hero" aria-label="Анимация грузовика" style="margin:16px 0 28px;">
+    <div class="truck-hero">
+        <svg class="truck-hero__road" viewBox="0 0 840 240" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+                <linearGradient id="roadGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#333"/>
+                    <stop offset="100%" stop-color="#1e1e1e"/>
+                </linearGradient>
+            </defs>
+            <!-- Ground -->
+            <rect x="0" y="180" width="840" height="60" fill="#0f1418"/>
+            <!-- Road stroke to visualize the path -->
+            <path d="M20,190 C 160,120 300,220 420,170 S 700,160 820,195"
+                  fill="none" stroke="url(#roadGrad)" stroke-width="10" stroke-linecap="round"/>
+            <!-- dashed center line -->
+            <path d="M20,190 C 160,120 300,220 420,170 S 700,160 820,195"
+                  fill="none" stroke="#d7d7d7" stroke-width="2" stroke-dasharray="10 10" stroke-linecap="round" opacity=".35"/>
+        </svg>
 
-        {% if latest_news %}
-        <section>
-            <h2>Последние новости</h2>
-            <article>
-                {% if latest_news.image %}
-                    <img src="{{ latest_news.image.url }}" alt="{{ latest_news.title }}">
-                {% endif %}
-                <div>
-                    <h3>{{ latest_news.title }}</h3>
-                    <p>{{ latest_news.short_description|truncatewords_html:40|safe }}</p>
-                    <a href="{% url 'news_detail' news_id=latest_news.id %}">Читать далее...</a>
+        <!-- Truck -->
+        <div class="truck" role="img" aria-label="Грузовик едет по дороге">
+            <div class="truck__shadow" aria-hidden="true"></div>
+            <div class="truck__body">
+                <div class="truck__cabin"></div>
+                <div class="truck__bed">
+                    <div class="cargo cargo--1" aria-hidden="true"></div>
+                    <div class="cargo cargo--2" aria-hidden="true"></div>
+                    <div class="cargo cargo--3" aria-hidden="true"></div>
                 </div>
-            </article>
-            <a href="{% url 'news_list' %}">Все новости &rarr;</a>
-        </section>
-        {% else %}
-        <section>
-             <h2>Новости</h2>
-            <p>Пока нет свежих новостей, но скоро они появятся!</p>
-            <a href="{% url 'news_list' %}">Архив новостей (если есть) &rarr;</a>
-        </section>
+            </div>
+            <div class="truck__wheel truck__wheel--front"></div>
+            <div class="truck__wheel truck__wheel--rear"></div>
+            <div class="splash splash--front" aria-hidden="true"></div>
+            <div class="splash splash--rear" aria-hidden="true"></div>
+        </div>
+
+        <!-- Brand reveal -->
+        <div class="brand-reveal" aria-live="polite">ВезёмВсё</div>
+    </div>
+</section>
+<p>Ваш надежный сервис для быстрой и удобной организации грузоперевозок. Мы соединяем клиентов с проверенными водителями и транспортными компаниями.</p>
+
+<!-- Added: Transformed logo showcase -->
+<section id="logo-transform" aria-labelledby="logo-transform-title">
+  <h2 id="logo-transform-title">Трансформированный логотип</h2>
+  <div class="logo-showcase">
+    <figure class="logo-card">
+      <img src="/media/company/logo.jpg" alt="Логотип — поворот" class="logo t-rotate">
+      <figcaption>rotate()</figcaption>
+    </figure>
+    <figure class="logo-card">
+      <img src="/media/company/logo.jpg" alt="Логотип — масштаб" class="logo t-scale">
+      <figcaption>scale()</figcaption>
+    </figure>
+    <figure class="logo-card">
+      <img src="/media/company/logo.jpg" alt="Логотип — наклон" class="logo t-skew">
+      <figcaption>skew()</figcaption>
+    </figure>
+    <figure class="logo-card">
+      <img src="/media/company/logo.jpg" alt="Логотип — сдвиг" class="logo t-translate">
+      <figcaption>translate()</figcaption>
+    </figure>
+    <figure class="logo-card">
+      <img src="/media/company/logo.jpg" alt="Логотип — комбинированный" class="logo t-combo">
+      <figcaption>rotate() + scale() + translate()</figcaption>
+    </figure>
+  </div>
+</section>
+
+{% if user.is_authenticated %}
+    <p>Вы вошли как <strong>{{ user.username }}</strong>.</p>
+    <p><a href="{% url 'account_hub' %}">Перейти в мой кабинет</a></p>
+{% else %}
+    <p>Войдите в систему или зарегистрируйтесь, чтобы разместить заказ или предложить свои услуги перевозчика.</p>
+    <div id="registration-options">
+        <a href="{% url 'register_driver' %}">Я Водитель</a>
+        <a href="{% url 'register_client' %}">Я Клиент</a>
+        <a href="{% url 'register_organization' %}">Я Организация</a>
+    </div>
+{% endif %}
+
+{% if latest_news %}
+<section>
+    <h2>Последние новости</h2>
+    <article id="latest-news-article" itemscope itemtype="https://schema.org/NewsArticle">
+        {% if latest_news.image %}
+            <img src="{{ latest_news.image.url }}" alt="{{ latest_news.title }}" itemprop="image">
         {% endif %}
+        <div>
+            <h3 itemprop="headline">{{ latest_news.title }}</h3>
+            <p itemprop="description">{{ latest_news.short_description|truncatewords_html:40|safe }}</p>
+            <a href="{% url 'news_detail' news_id=latest_news.id %}" itemprop="url">Читать далее...</a>
+            <meta itemprop="datePublished" content="{{ latest_news.created_at|date:'c' }}">
+        </div>
+    </article>
+    <a href="{% url 'news_list' %}">Все новости &rarr;</a>
+</section>
+{% else %}
+<section>
+     <h2>Новости</h2>
+    <p>Пока нет свежих новостей, но скоро они появятся!</p>
+    <a href="{% url 'news_list' %}">Архив новостей (если есть) &rarr;</a>
+</section>
+{% endif %}
+
+<section id="cargo-ads">
+    <h2><mark>Спецпредложения</mark> по грузоперевозкам</h2>
+    <div class="ad-gallery" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <a href="{% url 'create_order' %}" title="Оформить заказ">
+            <img src="/media/ad_0.webp" alt="Реклама грузоперевозок — оформить заказ" style="height:140px; object-fit:cover;">
+        </a>
+        <a href="{% url 'promocodes' %}" title="Посмотреть акции">
+            <img src="/media/ad_1.jpg" alt="Акции и скидки на перевозки" style="height:140px; object-fit:cover;">
+        </a>
+        <a href="{% url 'news_list' %}" title="Новости компании">
+            <img src="/media/ad_2.jpg" alt="Новости и обновления сервиса перевозок" style="height:140px; object-fit:cover;">
+        </a>
+    </div>
+</section>
+
+{% if partners %}
+<section id="partners">
+    <h2>Наши партнеры</h2>
+    <div class="partners-list">
+        {% for partner in partners %}
+            <a class="partner-pill" href="{{ partner.website_url }}" target="_blank" rel="noopener" title="{{ partner.name }}"
+               itemscope itemtype="https://schema.org/Organization" itemprop="url" aria-label="{{ partner.name }}">
+                <img src="{{ partner.logo.url }}" alt="" itemprop="logo" loading="lazy">
+                <span style="position:absolute;left:-9999px;" itemprop="name">{{ partner.name }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section id="glossary-faq" itemscope itemtype="https://schema.org/FAQPage">
+    <h2>Словарь терминов и <abbr title="Часто задаваемые вопросы">FAQ</abbr></h2>
+    {% if faq_items %}
+        <ul>
+            {% for item in faq_items %}
+                <li itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <details>
+                        <summary>
+                            <span itemprop="name">{{ item.question }}</span>
+                            <small style="margin-left:6px; color:#666;">{{ item.added_at|date:"d.m.Y" }}</small>
+                        </summary>
+                        <div style="margin-top:6px;" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+                            <div itemprop="text">
+                                {{ item.answer|linebreaksbr }}
+                            </div>
+                        </div>
+                    </details>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Пока нет записей словаря и часто задаваемых вопросов.</p>
+    {% endif %}
+</section>
+
+<section id="demo" aria-labelledby="demo-title" style="margin-top:32px;">
+    <h2 id="demo-title">Демонстрация HTML элементов</h2>
+    <aside aria-label="Вертикальная навигация по разделу" style="margin:12px 0;">
+        <nav id="demo-side-nav">
+            <ul>
+                <li><a href="#demo-text">Текст и семантика</a></li>
+                <li><a href="#demo-links">Ссылки и якоря</a></li>
+                <li><a href="#demo-figure">Фигуры и изображения</a></li>
+                <li><a href="#demo-table">Таблица с заголовками</a></li>
+                <li><a href="#demo-form">Форма и элементы управления</a></li>
+                <li><a href="#demo-media">Видео и аудио</a></li>
+                <li><a href="#demo-embed">Встраивание (iframe)</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <section id="demo-text" aria-labelledby="demo-text-title">
+        <h3 id="demo-text-title">Текст и семантика</h3>
+        <p>Сокращение: <abbr id="demo-abbr" title="Республика Беларусь">РБ</abbr>, а также <abbr title="Виртуальная частная сеть">VPN</abbr>.</p>
+        <p>Определения:</p>
+        <dl>
+            <dt><dfn id="term-logistics">Логистика</dfn></dt>
+            <dd>Планирование и управление потоками грузов и информации.</dd>
+        </dl>
+        <p>Цитата в тексте: <q id="demo-q">Короткая цитата в тексте</q>.</p>
+        <blockquote id="demo-blockquote" cite="https://example.com/source">
+            Длинная цитата, которая занимает несколько строк. Источник указан в атрибуте cite.
+            <footer>Источник: <cite>example.com</cite></footer>
+        </blockquote>
+        <p lang="en">Inline quote example: <q id="demo-q-en">This is an English quote</q>.</p>
+        <p>Дата и время: <time id="demo-time" datetime="{{ now|date:'c' }}">{{ now|date:"d.m.Y H:i" }}</time></p>
+        <section aria-labelledby="poem-title">
+            <h4 id="poem-title">Четверостишие</h4>
+            <p><strong>Потенциальные переносы строк:</strong></p>
+            <p>Строка раз<br>Вторую строку ждем<br>Третья в такт<br>Четвертая затем</p>
+            <p><strong>Фиксированные переносы строк (pre):</strong></p>
+            <pre>
+Строка раз
+Вторую строку ждем
+Третья в такт
+Четвертая затем
+            </pre>
+        </section>
+        <figure id="demo-code">
+            <figcaption>Пример листинга кода</figcaption>
+            <pre><code class="language-python">def price_with_tax(price, tax=0.2):
+    return round(price * (1 + tax), 2)</code></pre>
+        </figure>
+
+        <!-- Quotes by language demo -->
+        <section aria-labelledby="quotes-title" id="quotes-demo" style="margin-top:12px;">
+            <h4 id="quotes-title">Кавычки в разных языках</h4>
+            <p lang="ru">Русский: <q>Внешние кавычки и <q>внутренние</q> уровни.</q></p>
+            <p lang="be">Беларуская: <q>Вонкавыя двукоссі і <q>унутраныя</q> узроўні.</q></p>
+            <p lang="en">English: <q>Outer quotes and <q>inner quotes</q> example.</q></p>
+        </section>
+
+        <!-- Typography and cursors demo -->
+        <section id="typo-demo" aria-labelledby="typo-title" class="mt-4">
+            <span class="badge">Типографика</span>
+            <h4 id="typo-title" class="demo-transform font-serif">Заголовок в верхнем регистре (text-transform)</h4>
+            <p class="demo-indent">Абзац с красной строкой: первая строка отступает от левого края для улучшения читаемости текста в длинных блоках.</p>
+            <p class="demo-lh">Межстрочный интервал увеличен, чтобы показать влияние line-height на плотность текста и читаемость при больших массивах информации.</p>
+            <p class="demo-smallcaps">Этот фрагмент оформлен капителью: используется font-variant-caps: small-caps для стилистического выделения.</p>
+            <p class="demo-spacing">Интервалы между символами и словами увеличены: letter-spacing и word-spacing применены к этому предложению.</p>
+            <p class="demo-hyphen">Демонстрация переноса и разрыва слов: очень-длинно-составное-слово-которое-переносится-автоматически при нехватке места.</p>
+        </section>
+        <section id="cursor-demo" aria-label="Курсоры на кнопках" class="mt-3">
+            <button type="button" class="btn">Обычный</button>
+            <button type="button" class="btn btn--crosshair">Crosshair</button>
+            <button type="button" class="btn btn--grab">Grab</button>
+            <button type="button" class="btn btn--progress">Progress</button>
+        </section>
+    </section>
+
+    <section id="demo-links" aria-labelledby="demo-links-title">
+        <h3 id="demo-links-title">Ссылки и якоря</h3>
+        <ul>
+            <li><a href="https://www.example.com" target="_blank" rel="noopener">Внешняя ссылка</a></li>
+            <li><a href="mailto:info@vezemvse.by">Написать на email</a></li>
+            <li><a href="tel:+375291234567">Позвонить</a></li>
+            <li><a href="/media/sample.pdf" download>Скачать документ (PDF)</a></li>
+            <li><a href="#top">Наверх (якорь)</a></li>
+        </ul>
+    </section>
 
 
+    <section id="demo-table" aria-labelledby="demo-table-title">
+        <h3 id="demo-table-title">Таблица с заголовками, объединениями и headers</h3>
+        <table id="demo-table">
+            <caption>Прайс-лист услуг</caption>
+            <thead>
+                <tr>
+                    <th id="th-cat" scope="col">Категория</th>
+                    <th id="th-name" scope="col">Наименование</th>
+                    <th id="th-price" scope="col">Цена (руб.)</th>
+                    <th id="th-note" scope="col">Примечание</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th id="th-move" scope="row" rowspan="2">Переезды</th>
+                    <td headers="th-move th-name">Квартирный переезд</td>
+                    <td headers="th-move th-price"><data id="demo-data" value="120.00">120.00</data></td>
+                    <td headers="th-move th-note" rowspan="2">Возможна скидка по промокоду</td>
+                </tr>
+                <tr>
+                    <td headers="th-move th-name">Офисный переезд</td>
+                    <td headers="th-move th-price"><data value="250.00">250.00</data></td>
+                </tr>
+                <tr>
+                    <th id="th-cargo" scope="row">Доставка</th>
+                    <td headers="th-cargo th-name" colspan="2">Доставка документов (фикс.) — <data value="15.00">15.00</data></td>
+                    <td headers="th-cargo th-note">Без доп. услуг</td>
+                </tr>
+                <!-- Demo: empty cell to showcase :empty pseudo-class -->
+                <tr>
+                    <th id="th-other" scope="row">Прочее</th>
+                    <td headers="th-other th-name">Упаковочные материалы</td>
+                    <td headers="th-other th-price"><data value="30.00">30.00</data></td>
+                    <td headers="th-other th-note"></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th scope="row" colspan="3">Итого позиций</th>
+                    <td><data value="4">4</data></td>
+                </tr>
+            </tfoot>
+        </table>
+    </section>
+
+    <section id="demo-form" aria-labelledby="demo-form-title">
+        <h3 id="demo-form-title">Форма и элементы управления</h3>
+        <form method="post" action="#" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <fieldset>
+                <legend>Контактные данные</legend>
+                <label for="f-name">Имя</label>
+                <input id="f-name" name="name" type="text" required minlength="2" maxlength="100">
+
+                <label for="f-email">Email</label>
+                <input id="f-email" name="email" type="email" required>
+
+                <label for="f-phone">Телефон (BY)</label>
+                <input id="f-phone" name="phone" type="tel" pattern="^\+375\s\(\d{2}\)\s\d{3}-\d{2}-\d{2}$" title="+375 (XX) XXX-XX-XX">
+
+                <label for="f-url">Сайт</label>
+                <input id="f-url" name="url" type="url" placeholder="https://example.com">
+
+                <label for="f-pass">Пароль</label>
+                <input id="f-pass" name="password" type="password" required minlength="6">
+
+                <label for="f-disabled">Недоступное поле</label>
+                <input id="f-disabled" name="disabled_example" type="text" value="Недоступно" disabled>
+            </fieldset>
+
+            <fieldset>
+                <legend>Детали заказа</legend>
+                <label for="f-number">Количество</label>
+                <input id="f-number" name="qty" type="number" min="1" max="100" step="1" value="1">
+
+                <label for="f-number-bad">Количество (вне диапазона для демо)</label>
+                <input id="f-number-bad" name="qty_bad" type="number" min="10" max="20" step="1" value="0">
+
+                <label for="f-range">Приоритет</label>
+                <input id="f-range" name="priority" type="range" min="0" max="10" value="5">
+
+                <label for="f-date">Дата</label>
+                <input id="f-date" name="date" type="date">
+
+                <label for="f-time">Время</label>
+                <input id="f-time" name="time" type="time">
+
+                <label for="f-dt">Дата и время</label>
+                <input id="f-dt" name="datetime" type="datetime-local">
+
+                <label for="f-color">Цвет маркировки</label>
+                <input id="f-color" name="color" type="color" value="#1e88e5">
+
+                <label for="f-file">Файл</label>
+                <input id="f-file" name="file" type="file" accept=".pdf,.jpg,.png">
+
+                <label for="f-service">Услуга</label>
+                <select id="f-service" name="service" required>
+                    <optgroup label="Перевозки">
+                        <option value="flat">Квартирный переезд</option>
+                        <option value="office">Офисный переезд</option>
+                    </optgroup>
+                    <optgroup label="Доставка">
+                        <option value="docs">Доставка документов</option>
+                    </optgroup>
+                </select>
+
+                <label for="f-service-disabled">Услуга (недоступно)</label>
+                <select id="f-service-disabled" name="service_disabled" disabled>
+                    <option value="">Недоступно</option>
+                </select>
+
+                <label for="f-multi">Доп. опции (несколько)</label>
+                <select id="f-multi" name="options" multiple size="3">
+                    <option value="lift">Грузовой лифт</option>
+                    <option value="pack">Упаковка</option>
+                    <option value="fragile">Осторожно, хрупкое</option>
+                </select>
+
+                <label for="f-city">Город (datalist)</label>
+                <input id="f-city" name="city" list="cities">
+                <datalist id="cities">
+                    <option value="Минск"></option>
+                    <option value="Гродно"></option>
+                    <option value="Гомель"></option>
+                </datalist>
+
+                <fieldset>
+                    <legend>Тип плательщика</legend>
+                    <label><input type="radio" name="payer" value="person" checked> Физ. лицо</label>
+                    <label><input type="radio" name="payer" value="org"> Организация</label>
+                </fieldset>
+
+                <label><input type="checkbox" name="agree" required> Согласен с условиями</label>
+
+                <label><input type="checkbox" name="demo_checked" checked> Предварительно включенный флажок</label>
+
+                <label for="f-notes">Комментарий</label>
+                <textarea id="f-notes" name="notes" rows="3" maxlength="500"></textarea>
+            </fieldset>
+
+            <div style="margin-top:8px;">
+                <button type="submit">Отправить</button>
+                <button type="reset">Сброс</button>
+                <button type="submit" formnovalidate>Отправить без валидации</button>
+            </div>
+        </form>
+    </section>
+
+    <section id="demo-media" aria-labelledby="demo-media-title">
+        <h3 id="demo-media-title">Видео и аудио</h3>
+        <video id="demo-video" controls preload="metadata" width="560" poster="/media/ad_2.jpg" playsinline>
+            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+        <br>
+        <audio id="demo-audio" controls preload="metadata">
+            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" type="audio/mpeg">
+            Ваш браузер не поддерживает аудио.
+        </audio>
+    </section>
+
+    <section id="demo-embed" aria-labelledby="demo-embed-title">
+        <h3 id="demo-embed-title">Встраивание (iframe)</h3>
+        <iframe
+            id="demo-iframe"
+            src="{% url 'news_list' %}"
+            title="Список новостей"
+            width="560"
+            height="315"
+            loading="lazy"
+            sandbox="allow-same-origin allow-scripts allow-forms"
+            style="border:1px solid #ddd;">
+        </iframe>
+    </section>
+</section>
+
+<!-- NEW: Глобальные атрибуты -->
+<section id="global-attrs-demo" aria-labelledby="global-attrs-title" style="margin-top:32px;">
+    <h2 id="global-attrs-title">Глобальные атрибуты: демо</h2>
+
+    <p id="attr-accesskey">
+        <a href="#top" accesskey="t" title="Быстрый переход к началу (accesskey)">К началу страницы (accesskey)</a>
+    </p>
+
+    <p id="attr-lang" lang="en">This text is in English (lang).</p>
+
+    <div id="attr-class" class="demo-class">Элемент с классом (class)</div>
+
+    <p id="attr-contenteditable" contenteditable="true" spellcheck="true" title="Редактируемый текст">
+        Редактируемый текст (contenteditable + spellcheck)
+    </p>
+
+    <p id="attr-dir" t="rtl" style="border:1px dashed #ccc;padding:4px;">
+        Текст справа налево (dir="rtl")
+    </p>
+
+    <div style="display:flex;gap:8px;align-items:center;">
+        <button id="attr-tabindex" tabindex="2">tabindex=2</button>
+        <button tabindex="1">tabindex=1</button>
+        <button tabindex="0">tabindex=0</button>
     </div>
 
-    <footer>
-        <nav>
-            <a href="{% url 'promocodes' %}">Акции и промокоды</a>
-            <a href="{% url 'reviews' %}">Отзывы клиентов</a>
-            <a href="{% url 'about_us' %}">О нас</a>
-            <a href="{% url 'privacy_policy' %}">Политика конфиденциальности</a>
-            <a href="{% url 'news_list' %}">Новости</a>
-        </nav>
-        <p>&copy; {% now "Y" %} «ВезёмВсё». Все права защищены.</p>
-        <p>Если у вас есть вопросы, свяжитесь с нами: info@vezemvse.by</p>
-    </footer>
+    <span id="attr-hidden" hidden>Скрытый текст (hidden)</span>
 
-</body>
-</html>
+    <p>
+        <abbr id="attr-title" title="HyperText Markup Language">HTML</abbr> — с подсказкой (title)
+    </p>
+
+    <p id="attr-id">Элемент с собственным id (id)</p>
+
+    <p id="attr-translate" translate="no">BrandName VezemVse (translate="no")</p>
+
+    <p id="attr-style" style="color:#1565c0">Текст со встроенным стилем (style)</p>
+</section>
+
+<!-- Preloader demo at the bottom of the page (no JS) -->
+<section id="preloader-demo" aria-labelledby="preloader-title" style="margin:32px 0;">
+    <h2 id="preloader-title" class="visually-hidden">Прелоадер</h2>
+    <figure class="preloader-squares" aria-hidden="true">
+        <div class="field">
+            <div class="sq"></div>
+            <div class="sq"></div>
+            <div class="sq"></div>
+            <div class="sq"></div>
+            <div class="sq"></div>
+            <div class="sq"></div>
+            <div class="sq"></div>
+        </div>
+        <figcaption>Перемещающиеся квадраты</figcaption>
+    </figure>
+    <p class="text-muted" style="margin-top:8px;">Демо прелоадера (CSS-анимация, без скриптов).</p>
+    
+</section>
+{% endblock %}

@@ -1,22 +1,23 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Отзывы о Сервисе - ВезёмВсё</title>
+{% extends "logistics/base.html" %}
 
-</head>
-<body>
-    <nav>
-        <a href="{% url 'home_page' %}">На главную</a>
-    </nav>
+{% block title %}Отзывы о Сервисе{% endblock %}
 
-    <h1>Отзывы о нашем сервисе</h1>
+{% block head_extra %}
+    {{ block.super }}
+    <meta name="description" content="Отзывы клиентов и водителей о сервисе грузоперевозок «ВезёмВсё».">
+    <meta property="og:title" content="Отзывы о Сервисе - ВезёмВсё">
+{% endblock %}
 
-    {% if reviews_list %}
-        <p>Здесь вы можете прочитать, что говорят о нас наши клиенты и водители.</p>
-        {% for review in reviews_list %}
-            <div>
-                <h3>
+{% block content %}
+<h1>Отзывы о нашем сервисе</h1>
+
+{% if reviews_list %}
+    <p>Здесь вы можете прочитать, что говорят о нас наши клиенты и водители.</p>
+    {% for review in reviews_list %}
+        <article>
+            <header>
+                <h2 class="sr-only">Отзыв</h2>
+                <p><cite>
                     {% if review.user %}
                         {{ review.user.get_full_name|default:review.user.username }}
                     {% elif review.author_name %}
@@ -24,28 +25,27 @@
                     {% else %}
                         Анонимный пользователь
                     {% endif %}
-                </h3>
-                <div>
-                    <span>Дата: {{ review.created_at|date:"d.m.Y H:i" }}</span>
-                    {% if review.rating %}
-                        <span> | Оценка: {{ review.rating }}/5 ★</span>
-                    {% endif %}
-                </div>
-                <p>"{{ review.text|linebreaksbr }}"</p>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Пока нет ни одного отзыва. Будьте первым, кто поделится своим мнением о нашем сервисе!</p>
-    {% endif %}
+                </cite></p>
+                <p>
+                    <small>
+                        <time datetime="{{ review.created_at|date:'c' }}">Дата: {{ review.created_at|date:"d.m.Y H:i" }}</time>
+                        {% if review.rating %}
+                            <span> | Оценка:
+                                <meter min="1" max="5" value="{{ review.rating }}">{{ review.rating }}/5</meter>
+                            </span>
+                        {% endif %}
+                    </small>
+                </p>
+            </header>
+            <p>"{{ review.text|linebreaksbr }}"</p>
+        </article>
+    {% endfor %}
+{% else %}
+    <p>Пока нет ни одного отзыва. Будьте первым, кто поделится своим мнением о нашем сервисе!</p>
+{% endif %}
 
-    <div>
-        <h2>Оставить отзыв</h2>
-        <p>Мы ценим ваше мнение! Функционал добавления отзывов напрямую через сайт будет доступен в ближайшее время. А пока вы можете отправить свой отзыв нам на почту: reviews@vezemvse.example.com</p>
-    </div>
-
-    <footer>
-        <p><a href="{% url 'home_page' %}">Вернуться на главную страницу</a></p>
-        <p>&copy; {% now "Y" %} «ВезёмВсё»</p>
-    </footer>
-</body>
-</html>
+<section aria-labelledby="leave-review">
+    <h2 id="leave-review">Оставить отзыв</h2>
+    <p>Мы ценим ваше мнение! Функционал добавления отзывов напрямую через сайт будет доступен в ближайшее время. А пока вы можете отправить свой отзыв нам на почту: reviews@vezemvse.example.com</p>
+</section>
+{% endblock %}

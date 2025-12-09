@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Регистрация успешна - ВезёмВсё</title>
+{% extends "logistics/base.html" %}
 
-</head>
-<body>
-    <h1>Регистрация успешна!</h1>
-    <p>Ваша регистрация прошла успешно!</p>
-    <p><a href="/">Вернуться на главную</a></p>
+{% block title %}Регистрация успешна{% endblock %}
 
+{% block head_extra %}
+    {{ block.super }}
+    <meta name="description" content="Регистрация прошла успешно. Добро пожаловать в «ВезёмВсё»!">
+    <meta property="og:title" content="Регистрация успешна - ВезёмВсё">
+{% endblock %}
 
-</body>
-</html>
+{% block content %}
+<h1>Регистрация успешна!</h1>
+<p>Ваша регистрация прошла <strong>успешно</strong>! Добро пожаловать в <strong>«ВезёмВсё»</strong>!</p>
+<p><a href="{% url 'home_page' %}">Вернуться на главную</a></p>
+{% endblock %}

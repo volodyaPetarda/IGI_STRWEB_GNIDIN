@@ -40,7 +40,18 @@ urlpatterns = [
     path('news/', views.news_list_view, name='news_list'),
     path('news/<int:news_id>/', views.news_detail_view, name='news_detail'),
 
+    path('services/', views.services_catalog_view, name='services_catalog'),
+
     path('random-fact-pet/', views.random_fact_pet_view, name='random_fact_pet'),
     path('statistics/', views.site_statistics_view, name='site_statistics'),
+
+    # Cart and Payment
+    path('cart/', views.cart_view, name='cart'),
+    path('payment/', views.payment_view, name='payment'),
+
+    path('contacts/', views.contacts, name='contacts'),
+
+    # Glossary / FAQ
+    path('glossary/', views.glossary_view, name='glossary'),
 
 ]

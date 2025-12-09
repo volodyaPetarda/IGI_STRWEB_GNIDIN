@@ -1,0 +1,20 @@
+/* Components scaffold: buttons, cards, forms, tables */
+
+/* Buttons */
+button, .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 0; border-radius: var(--radius-sm); background: var(--color-primary); color: #fff; box-shadow: var(--shadow-1); transition: transform .15s ease, box-shadow .2s ease; cursor: pointer; }
+button:hover, .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+button:active, .btn:active { transform: translateY(0); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Cards */
+.card { background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(2px); border-radius: var(--radius-md); box-shadow: var(--shadow-1); padding: var(--space-4); }
+
+/* Forms (basic baseline; detailed states added later) */
+label { display: block; margin-top: var(--space-3); }
+input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius-sm); background: rgba(255,255,255,.05); color: #fff; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* Tables baseline */
+table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.04); border-radius: var(--radius-sm); overflow: hidden; }
+th, td { padding: 10px 12px; border: 1px solid rgba(255,255,255,.15); text-align: left; vertical-align: middle; }
+caption { caption-side: top; padding: var(--space-3); font-weight: 600; }

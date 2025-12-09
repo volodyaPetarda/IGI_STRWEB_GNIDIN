@@ -1,0 +1,37 @@
+/* Page: News Detail — multi-column article layout */
+
+#news-detail .article-body {
+    column-count: 3;
+    column-gap: var(--space-5);
+    column-rule: 1px solid rgba(255, 255, 255, 0.15);
+    hyphens: auto;
+}
+
+/* Prevent elements from breaking inside columns */
+#news-detail .article-body h2,
+#news-detail .article-body h3,
+#news-detail .article-body h4,
+#news-detail .article-body figure,
+#news-detail .article-body blockquote,
+#news-detail .article-body ul,
+#news-detail .article-body ol {
+    break-inside: avoid;
+}
+
+#news-detail #news-figure {
+    break-before: column;
+    margin-bottom: var(--space-4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    #news-detail .article-body {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    #news-detail .article-body {
+        column-count: 1;
+    }
+}

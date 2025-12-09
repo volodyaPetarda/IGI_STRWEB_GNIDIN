@@ -4,59 +4,37 @@
 
 {% block title %}{{ title }} - ВезёмВсё{% endblock %}
 
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/news.css' %}">
+{% endblock %}
+
 {% block content %}
-<div>
-    <h1>{{ title }}</h1>
+<section id="news-list" aria-labelledby="news-list-title">
+    <h1 id="news-list-title">{{ title }}</h1>
 
     {% if page_obj.object_list %}
-        {% for news_item in page_obj.object_list %}
-            <article>
-                <div>
-                    {% if news_item.image %}
-                    <div>
+                {% for news_item in page_obj.object_list %}
+            <article class="news-card{% if forloop.last %} is-last-card{% endif %}">
+                {% if news_item.image %}
+                    <figure>
                         <a href="{% url 'news_detail' news_id=news_item.id %}">
                             <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
                         </a>
-                    </div>
-                    {% endif %}
-                    <div>
-                        <div>
-                            <h5>
-                                <a href="{% url 'news_detail' news_id=news_item.id %}">{{ news_item.title }}</a>
-                            </h5>
-                            <p>
-                                <small>
-                                    Опубл. (UTC): {{ news_item.created_at|timezone:"UTC"|date:"d/m/Y" }}
-                                    {% if news_item.created_at|date:"H:i" != "00:00" %}
-                                        ({{ news_item.created_at|timezone:"UTC"|date:"H:i" }})
-                                    {% endif %}
-                                    <br>
-                                    Опубл. ({{ user_timezone_str_ctx }}): {{ news_item.created_at|timezone:user_timezone_str_ctx|date:"d/m/Y" }}
-                                    {% if news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" != "00:00" %}
-                                        ({{ news_item.created_at|timezone:user_timezone_str_ctx|date:"H:i" }})
-                                    {% endif %}
-                                </small>
-                            </p>
+                    </figure>
+                {% endif %}
 
-                             {% if news_item.updated_at|date:"YmdHis" != news_item.created_at|date:"YmdHis" %}
-                                <p>
-                                    <small>
-                                        Обнов. (UTC): {{ news_item.updated_at|timezone:"UTC"|date:"d/m/Y H:i" }}<br>
-                                        Обнов. ({{ user_timezone_str_ctx }}): {{ news_item.updated_at|timezone:user_timezone_str_ctx|date:"d/m/Y H:i" }}
-                                    </small>
-                                </p>
-                            {% endif %}
-                            <p>{{ news_item.short_description|truncatewords_html:35|safe }}</p>
-                            <a href="{% url 'news_detail' news_id=news_item.id %}">Читать полностью &rarr;</a>
-                        </div>
-                    </div>
+                <div class="card-content">
+                    <header>
+                        <h2><a href="{% url 'news_detail' news_id=news_item.id %}">{{ news_item.title }}</a></h2>
+                    </header>
+                    <p class="description">{{ news_item.short_description|truncatewords:15 }}</p>
+                    <a href="{% url 'news_detail' news_id=news_item.id %}" class="read-more-btn">Читать далее &rarr;</a>
                 </div>
             </article>
         {% endfor %}
 
-
         {% if is_paginated %}
-            <nav>
+            <nav aria-label="Навигация по страницам">
                 <ul>
                      {% if page_obj.has_previous %}
                         <li><a href="?page=1{% if params_for_pagination %}&amp;{{ params_for_pagination }}{% endif %}">&laquo; Первая</a></li>
@@ -80,15 +58,12 @@
                 </ul>
             </nav>
         {% endif %}
-
     {% else %}
         <p>На данный момент новостей нет.</p>
     {% endif %}
-    <div>
-        <a href="{% url 'home_page' %}">
-             На главную
-        </a>
-    </div>
-</div>
 
+    <nav aria-label="Хлебные крошки">
+        <a href="{% url 'home_page' %}">На главную</a>
+    </nav>
+</section>
 {% endblock %}

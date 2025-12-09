@@ -1,0 +1,141 @@
+/* Page: Home — scaffold only; detailed LR2 work will follow */
+
+/* Partners section: circular partner blocks using CSS */
+#partners .partners-list { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+#partners .partner-pill {
+	--partner-size: 96px;
+	--partner-border-color: rgba(255,255,255,.7);
+	--partner-bg: rgba(255,255,255,.08);
+
+	width: var(--partner-size);
+	height: var(--partner-size);
+	border-radius: 50%;
+	border: 3px solid var(--partner-border-color);
+	box-shadow: 0 6px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--partner-bg);
+	transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+}
+#partners .partner-pill:hover { box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); transform: translateY(-3px); }
+#partners .partner-pill img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); transition: filter .2s ease; }
+#partners .partner-pill:hover img { filter: drop-shadow(0 6px 14px rgba(0,0,0,.55)); }
+
+/* Vary border style and color to demonstrate type/color tuning */
+#partners .partner-pill:nth-child(3n+1) { border-style: solid; --partner-border-color: #ffd54f; }
+#partners .partner-pill:nth-child(3n+2) { border-style: dashed; --partner-border-color: #1e88e5; }
+#partners .partner-pill:nth-child(3n)   { border-style: dotted; --partner-border-color: #43a047; }
+
+/* Responsive: grow size slightly on larger screens */
+@media (min-width: 900px) {
+	#partners .partner-pill { --partner-size: 108px; }
+}
+
+/* Latest news position hooks */
+#latest-news-article { position: relative; }
+#latest-news-article .badge-latest { position: absolute; top: 8px; left: 8px; background: var(--color-accent); color: #000; padding: 2px 8px; border-radius: 999px; font-size: var(--fs-2); }
+
+/* Demo area placeholder tweaks */
+#demo { background: rgba(255,255,255,.03); border-radius: var(--radius-md); padding: var(--space-4); }
+
+/* ==========================
+	Typography & cursor demo
+	========================== */
+#typo-demo { position: relative; padding: var(--space-4); border: 1px dashed rgba(255,255,255,.2); border-radius: var(--radius-sm); }
+#typo-demo .badge { position: absolute; top: -10px; right: 8px; background: var(--color-accent); color: #000; padding: 2px 8px; border-radius: 999px; font-size: var(--fs-2); }
+#typo-demo p.demo-indent { text-indent: 2em; }
+#typo-demo p.demo-lh { line-height: 1.9; }
+#typo-demo p.demo-smallcaps { font-variant-caps: small-caps; letter-spacing: .6px; }
+#typo-demo p.demo-spacing { letter-spacing: .8px; word-spacing: 6px; }
+#typo-demo p.demo-hyphen { hyphens: auto; overflow-wrap: anywhere; max-width: 55ch; text-align: justify; }
+#typo-demo h4.demo-transform { text-transform: uppercase; letter-spacing: 1px; }
+#cursor-demo .btn + .btn { margin-left: 8px; }
+#cursor-demo .btn { background: #0d47a1; }
+#cursor-demo .btn:hover { background: #1565c0; }
+
+/* ==========================
+	Lists and Tables (positions)
+	========================== */
+/* List in demo-links: first, last, n-th items */
+#demo-links ul { list-style: disc inside; padding: 0; }
+#demo-links ul li { padding: 6px 8px; border-radius: 6px; }
+#demo-links ul li:first-child { background: rgba(255,255,255,0.06); font-weight: 600; }
+#demo-links ul li:last-child { background: rgba(255,179,0,0.12); }
+#demo-links ul li:nth-child(odd) { outline: 1px dashed rgba(255,255,255,0.15); }
+#demo-links ul li:nth-child(3n) { background: rgba(30,136,229,0.15); }
+
+/* Table rows/columns: first, last, nth-child */
+#demo-table thead th:first-child { border-top-left-radius: 6px; }
+#demo-table thead th:last-child { border-top-right-radius: 6px; }
+#demo-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.04); }
+#demo-table tbody tr:nth-child(odd) { background: rgba(0,0,0,0.06); }
+#demo-table tbody tr:first-child { box-shadow: inset 0 2px 0 rgba(255,255,255,0.08); }
+#demo-table tbody tr:last-child { box-shadow: inset 0 -2px 0 rgba(255,255,255,0.08); }
+#demo-table tbody td:nth-child(3),
+#demo-table tbody th:nth-child(3) { text-align: right; }
+#demo-table tfoot td:last-child { font-weight: 700; }
+
+/* Empty cells highlight (if any appear) */
+#demo-table td:empty { background: rgba(229,57,53,0.2); }
+
+/* ==========================
+	Forms: states and validity
+	========================== */
+#demo-form form input,
+#demo-form form select,
+#demo-form form textarea { transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease; }
+
+/* Required vs optional */
+#demo-form form :required { border-color: rgba(255,179,0,0.7); background: rgba(255,179,0,0.06); }
+#demo-form form :optional { border-color: rgba(255,255,255,0.2); }
+
+/* Enabled/disabled */
+#demo-form form :enabled { filter: none; opacity: 1; }
+#demo-form form :disabled { opacity: .6; cursor: not-allowed; }
+
+/* Validity */
+#demo-form form :invalid { border-color: rgba(229,57,53,0.8); background: rgba(229,57,53,0.12); }
+#demo-form form :valid { border-color: rgba(67,160,71,0.8); background: rgba(67,160,71,0.08); }
+
+/* Range/number in/out of range */
+#demo-form form input:in-range { box-shadow: 0 0 0 2px rgba(67,160,71,0.35); }
+#demo-form form input:out-of-range { box-shadow: 0 0 0 2px rgba(229,57,53,0.35); }
+
+/* Checked radios/checkboxes */
+#demo-form form input[type="checkbox"],
+#demo-form form input[type="radio"] { accent-color: var(--color-accent); }
+#demo-form form input[type="checkbox"]:checked,
+#demo-form form input[type="radio"]:checked { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* Focused controls */
+#demo-form form input:focus-visible,
+#demo-form form select:focus-visible,
+#demo-form form textarea:focus-visible { box-shadow: 0 0 0 3px rgba(255,179,0,0.35); }
+
+/* Russian/Belarusian: « » and „ “ */
+:lang(ru) q, :lang(be) q { quotes: "\00AB" "\00BB" "\201E" "\201C"; }
+/* English: “ ” and ‘ ’ */
+:lang(en) q { quotes: "\201C" "\201D" "\2018" "\2019"; }
+/* Fallback: inherit chosen locale quotes */
+q { quotes: inherit; }
+/* Ensure rendering via pseudo-elements (explicit, though UA stylesheet usually has it) */
+q::before { content: open-quote; }
+q::after { content: close-quote; }
+
+/* Added: Transformed logo showcase */
+#logo-transform { margin: 24px 0; }
+#logo-transform .logo-showcase { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+#logo-transform .logo-card { background: rgba(255,255,255,.04); border-radius: var(--radius-md); padding: 12px; box-shadow: var(--shadow-1); text-align: center; width: 160px; }
+#logo-transform .logo-card figcaption { margin-top: 8px; font-size: var(--fs-2); opacity: .85; }
+#logo-transform .logo { width: 120px; height: 120px; object-fit: cover; display: block; margin-inline: auto; filter: drop-shadow(0 6px 16px rgba(0,0,0,.35)); transform-origin: 50% 50%; transition: transform .35s ease; }
+#logo-transform .logo.t-rotate { transform: rotate(-10deg); }
+#logo-transform .logo.t-rotate:hover { transform: rotate(10deg); }
+#logo-transform .logo.t-scale { transform: scale(1.05); }
+#logo-transform .logo.t-scale:hover { transform: scale(1.25); }
+#logo-transform .logo.t-skew { transform: skew(-10deg, 3deg); }
+#logo-transform .logo.t-skew:hover { transform: skew(8deg, -2deg); }
+#logo-transform .logo.t-translate { transform: translate(8px, -6px); }
+#logo-transform .logo.t-translate:hover { transform: translate(-8px, 6px); }
+#logo-transform .logo.t-combo { transform: translateY(-6px) rotate(8deg) scale(1.1); }
+#logo-transform .logo.t-combo:hover { transform: translateY(2px) rotate(-6deg) scale(1.15); }

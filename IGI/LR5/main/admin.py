@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     VehicleType, BodyType, CargoType, Driver, Vehicle, Client, Organization,
-    Service, Order, Review, PromoCode, News
+    Service, Order, Review, PromoCode, News, Partner, CompanyInfo, CompanyHistoryItem, GlossaryItem,
+    Contact
 )
 
 admin.site.site_header = "Администрирование Грузоперевозок"
@@ -43,6 +44,13 @@ class OrderInlineForOrganization(admin.TabularInline):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+class CompanyHistoryItemInline(admin.TabularInline):
+    model = CompanyHistoryItem
+    extra = 1
+    fields = ('year', 'text')
+    verbose_name = "Пункт истории"
+    verbose_name_plural = "История по годам"
 
 @admin.register(VehicleType)
 class VehicleTypeAdmin(admin.ModelAdmin):
@@ -326,3 +334,50 @@ class NewsAdmin(admin.ModelAdmin):
     list_filter = ('is_published', 'created_at')
     search_fields = ('title', 'short_description', 'full_description')
     list_editable = ('is_published',)
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'website_url', 'logo_preview', 'created_at')
+    readonly_fields = ('logo_preview',)
+    search_fields = ('name', 'website_url')
+    list_per_page = 25
+
+    def logo_preview(self, obj):
+        if obj.logo:
+            return format_html('<img src="{}" style="height:40px;">', obj.logo.url)
+        return "—"
+    logo_preview.short_description = "Логотип"
+
+@admin.register(CompanyInfo)
+class CompanyInfoAdmin(admin.ModelAdmin):
+    list_display = ('company_name', 'updated_at')
+    inlines = [CompanyHistoryItemInline]
+    readonly_fields = ('updated_at',)
+    fieldsets = (
+        (None, {'fields': ('company_name', 'description', 'logo', 'video_url')}),
+        ('Официальная информация', {'fields': ('requisites', 'certificate_text')}),
+        ('Системные поля', {'fields': ('updated_at',), 'classes': ('collapse',)}),
+    )
+
+@admin.register(GlossaryItem)
+class GlossaryItemAdmin(admin.ModelAdmin):
+    list_display = ('question', 'added_at')
+    search_fields = ('question', 'answer')
+    list_filter = ('added_at',)
+    date_hierarchy = 'added_at'
+    ordering = ('-added_at',)
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'position', 'email', 'phone_number', 'is_active', 'preview', 'sort_order', 'updated_at')
+    list_editable = ('is_active', 'sort_order')
+    search_fields = ('full_name', 'position', 'email', 'phone_number')
+    list_filter = ('is_active',)
+    readonly_fields = ('preview', 'created_at', 'updated_at')
+    fields = (('full_name', 'position'), ('email', 'phone_number'), 'photo', 'preview', 'responsibilities', ('is_active', 'sort_order'), ('created_at', 'updated_at'))
+
+    def preview(self, obj):
+        if obj.photo:
+            return format_html('<img src="{}" style="height:60px;">', obj.photo.url)
+        return "—"
+    preview.short_description = "Фото"

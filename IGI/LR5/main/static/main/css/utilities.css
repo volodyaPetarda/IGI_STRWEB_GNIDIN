@@ -1,0 +1,32 @@
+/* Utilities scaffold */
+.mt-0{margin-top:0}.mt-1{margin-top:var(--space-1)}.mt-2{margin-top:var(--space-2)}.mt-3{margin-top:var(--space-3)}.mt-4{margin-top:var(--space-4)}.mt-5{margin-top:var(--space-5)}
+.mb-0{margin-bottom:0}.mb-1{margin-bottom:var(--space-1)}.mb-2{margin-bottom:var(--space-2)}.mb-3{margin-bottom:var(--space-3)}.mb-4{margin-bottom:var(--space-4)}.mb-5{margin-bottom:var(--space-5)}
+.p-0{padding:0}.p-1{padding:var(--space-1)}.p-2{padding:var(--space-2)}.p-3{padding:var(--space-3)}.p-4{padding:var(--space-4)}.p-5{padding:var(--space-5)}
+.text-center{text-align:center}.text-right{text-align:right}.text-left{text-align:left}
+.w-full{width:100%}
+
+/* Typography utilities */
+.indent-1{ text-indent: 1.5em; }
+.indent-2{ text-indent: 2em; }
+.lh-tight{ line-height: 1.25; }
+.lh-normal{ line-height: 1.6; }
+.lh-loose{ line-height: 1.9; }
+.tt-upper{ text-transform: uppercase; }
+.tt-lower{ text-transform: lowercase; }
+.tt-cap{ text-transform: capitalize; }
+.small-caps{ font-variant-caps: small-caps; }
+.variant-advanced{ font-variant: small-caps lining-nums; }
+.ls-tight{ letter-spacing: .2px; }
+.ls-wide{ letter-spacing: .6px; }
+.ws-tight{ word-spacing: 1px; }
+.ws-wide{ word-spacing: 4px; }
+.hyphens-auto{ hyphens: auto; }
+.break-words{ overflow-wrap: break-word; word-wrap: break-word; }
+.break-anywhere{ overflow-wrap: anywhere; }
+.ta-justify{ text-align: justify; }
+
+/* Positioning utilities */
+.pos-rel{ position: relative; }
+.pos-abs{ position: absolute; }
+.top-0{ top: 0; }.right-0{ right: 0; }.bottom-0{ bottom: 0; }.left-0{ left: 0; }
+.z-10{ z-index:10 }.z-20{ z-index:20 }

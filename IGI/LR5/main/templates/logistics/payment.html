@@ -1,0 +1,49 @@
+{% extends "logistics/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section aria-labelledby="payment-title">
+    <h1 id="payment-title">{{ title }}</h1>
+
+    {% if cart_orders %}
+        <h2>Заказы к оплате</h2>
+        <ul>
+            {% for order in cart_orders %}
+                <li>
+                    <article>
+                        <header>
+                            <strong>#{{ order.id }}</strong>{% if order.service %} — {{ order.service.name }}{% endif %}
+                        </header>
+                        <p>Сумма: {{ order.total_cost }} руб.</p>
+                    </article>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <p><strong><mark>Итого:</mark></strong> <strong><data value="{{ cart_subtotal }}">{{ cart_subtotal }}</data></strong> руб.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="promo_code">Промокод:</label>
+            <input type="text" id="promo_code" name="promo_code" value="{{ promo_code_input }}" placeholder="Введите промокод">
+            <div style="margin-top:8px;">
+                <button type="submit" name="action" value="apply">Применить промокод</button>
+            </div>
+            {% if applied_promo %}
+                <p>Применен промокод: <code>{{ applied_promo.code }}</code></p>
+                <p>Скидка: <strong><data value="{{ discount_amount }}">{{ discount_amount }}</data></strong> руб.</p>
+            {% endif %}
+            <p><strong><mark>К оплате:</mark></strong> <strong><data value="{{ total_due }}">{{ total_due }}</data></strong> руб.</p>
+
+            <div style="margin-top:8px;">
+                <button type="submit" name="action" value="pay">Оплатить</button>
+                <a href="{% url 'cart' %}" style="margin-left:12px;">Назад в корзину</a>
+            </div>
+        </form>
+    {% else %}
+        <p>Корзина пуста. Нечего оплачивать.</p>
+        <p><a href="{% url 'create_order' %}">Создать заказ</a></p>
+    {% endif %}
+</section>
+{% endblock %}

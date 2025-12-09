@@ -1,0 +1,55 @@
+{% extends "logistics/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/contacts.css' %}">
+{% endblock %}
+
+{% block content %}
+<section id="contacts-section" aria-labelledby="contacts-title">
+    <h1 id="contacts-title">{{ title }}</h1>
+
+    {% if staff %}
+        <ul>
+            {% for person in staff %}
+                <li>
+                    <article>
+                        <figure style="margin:0;">
+                            {% if person.photo %}
+                                <img src="{{ person.photo.url }}" alt="{{ person.full_name }}" style="width:72px;height:72px;object-fit:cover;border-radius:50%;flex:0 0 auto;">
+                            {% else %}
+                                <div aria-hidden="true" style="width:72px;height:72px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;color:#666;font-weight:bold;">
+                                    {{ person.full_name|first|upper }}
+                                </div>
+                            {% endif %}
+                        </figure>
+                        <div class="person-details">
+                            <header>
+                                <strong>{{ person.full_name }}</strong><br>
+                                <small style="color:#555;"><em>{{ person.position }}</em></small>
+                            </header>
+
+                            {% if person.responsibilities %}
+                                <p style="margin-top:8px;">{{ person.responsibilities|linebreaksbr }}</p>
+                            {% endif %}
+
+                            <address style="margin-top:8px;">
+                                {% if person.phone_number %}
+                                    <div>Телефон: <a href="tel:{{ person.phone_number|cut:' ' |cut:'(' |cut:')' |cut:'-' }}">{{ person.phone_number }}</a></div>
+                                {% endif %}
+                                {% if person.email %}
+                                    <div>Email: <a href="mailto:{{ person.email }}">{{ person.email }}</a></div>
+                                {% endif %}
+                            </address>
+                        </div>
+                    </article>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Контакты пока не добавлены.</p>
+    {% endif %}
+</section>
+{% endblock %}

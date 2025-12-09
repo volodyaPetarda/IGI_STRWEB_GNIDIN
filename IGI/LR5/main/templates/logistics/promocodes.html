@@ -1,62 +1,70 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Промокоды и Акции - ВезёмВсё</title>
+{% extends "logistics/base.html" %}
+{% load static %}
 
-</head>
-<body>
-    <nav>
-        <a href="{% url 'home_page' %}">На главную</a>
-    </nav>
+{% block title %}Промокоды и Акции{% endblock %}
 
-    <h1>Промокоды и Акции</h1>
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/coupons.css' %}">
+{% endblock %}
 
-    <div>
-        <form method="GET" action="{% url 'promocodes' %}">
-            <label for="min_percentage">Минимальная скидка (% >=):</label>
-            <input type="number" name="min_percentage" id="min_percentage" value="{{ current_filters.min_percentage|default_if_none:'' }}" min="0" max="100" step="1">
+{% block head_extra %}
+    {{ block.super }}
+    <meta name="description" content="Актуальные промокоды и акции на услуги грузоперевозок «ВезёмВсё».">
+    <meta property="og:title" content="Промокоды и Акции - ВезёмВсё">
+{% endblock %}
 
-            <label for="sort_option">Сортировать по:</label>
-            <select name="sort_option" id="sort_option">
-                <option value="default" {% if current_filters.sort_option == 'default' %}selected{% endif %}>По умолчанию (актуальность)</option>
-                <option value="perc_asc" {% if current_filters.sort_option == 'perc_asc' %}selected{% endif %}>Проценту скидки (возрастание)</option>
-                <option value="perc_desc" {% if current_filters.sort_option == 'perc_desc' %}selected{% endif %}>Проценту скидки (убывание)</option>
-            </select>
-            <button type="submit">Применить</button>
-             <a href="{% url 'promocodes' %}">Сбросить</a>
-        </form>
-    </div>
+{% block content %}
+<h1>Промокоды и Акции</h1>
 
-    {% if promocodes_list %}
-        <h2>Актуальные промокоды и акции:</h2>
+<section aria-labelledby="filters">
+    <h2 id="filters">Фильтр</h2>
+    <form method="GET" action="{% url 'promocodes' %}">
+        <label for="min_percentage">Минимальная скидка (% >=):</label>
+        <input type="number" name="min_percentage" id="min_percentage" value="{{ current_filters.min_percentage|default_if_none:'' }}" min="0" max="100" step="1">
+
+        <label for="sort_option">Сортировать по:</label>
+        <select name="sort_option" id="sort_option">
+            <option value="default" {% if current_filters.sort_option == 'default' %}selected{% endif %}>По умолчанию (актуальность)</option>
+            <option value="perc_asc" {% if current_filters.sort_option == 'perc_asc' %}selected{% endif %}>Проценту скидки (возрастание)</option>
+            <option value="perc_desc" {% if current_filters.sort_option == 'perc_desc' %}selected{% endif %}>Проценту скидки (убывание)</option>
+        </select>
+        <button type="submit">Применить</button>
+        <a href="{% url 'promocodes' %}">Сбросить</a>
+    </form>
+    <hr>
+</section>
+
+{% if promocodes_list %}
+    <section aria-labelledby="promos">
+        <h2 id="promos">Актуальные промокоды и акции</h2>
         <ul>
             {% for promo in promocodes_list %}
                 <li>
-                    <strong>{{ promo.code }}</strong>
-                    <div>{{ promo.description }}</div>
-
-                    {% if promo.discount_type == 'percentage' %}
-                        <span>Скидка: {{ promo.discount_value|floatformat:"-2" }}%</span>
-                    {% elif promo.discount_type == 'fixed_amount' %}
-                        <span>Скидка: {{ promo.discount_value|floatformat:"-2" }} руб.</span>
-                    {% endif %}
-
-                    {% if promo.end_date %}
-                        <em>(Действителен до: {{ promo.end_date|date:"d.m.Y H:i" }})</em>
-                    {% else %}
-                         <em>(Срок действия не указан)</em>
-                    {% endif %}
+                    <article>
+                        <header>
+                            <h3><code>{{ promo.code }}</code></h3>
+                        </header>
+                        <p>{{ promo.description }}</p>
+                        <p>
+                            {% if promo.discount_type == 'percentage' %}
+                                <mark>Скидка: <data value="{{ promo.discount_value|floatformat:'-2' }}">{{ promo.discount_value|floatformat:"-2" }}</data>%</mark>
+                            {% elif promo.discount_type == 'fixed_amount' %}
+                                <mark>Скидка: <data value="{{ promo.discount_value|floatformat:'-2' }}">{{ promo.discount_value|floatformat:"-2" }}</data> руб.</mark>
+                            {% endif %}
+                        </p>
+                        <p>
+                            {% if promo.end_date %}
+                                <time datetime="{{ promo.end_date|date:'c' }}">Действителен до: {{ promo.end_date|date:"d.m.Y H:i" }}</time>
+                            {% else %}
+                                <em>Срок действия не указан</em>
+                            {% endif %}
+                        </p>
+                    </article>
                 </li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p>По вашему запросу активных промокодов не найдено. Попробуйте изменить фильтры или следите за обновлениями!</p>
-    {% endif %}
-
-    <footer>
-        <p><a href="{% url 'home_page' %}">Вернуться на главную страницу</a></p>
-        <p>&copy; {% now "Y" %} «ВезёмВсё»</p>
-    </footer>
-</body>
-</html>
+    </section>
+{% else %}
+    <p>По вашему запросу активных промокодов не найдено. Попробуйте изменить фильтры или следите за обновлениями!</p>
+{% endif %}
+{% endblock %}

@@ -4,31 +4,34 @@
 
 {% block head_extra %}
     {{ block.super }}
-
 {% endblock %}
 
 {% block content %}
-<div>
-    <h1>Статистика Сайта</h1>
+<section aria-labelledby="stats-title">
+    <h1 id="stats-title">Статистика Сайта</h1>
 
-    <div>
-        <section>
-            <h2>Типы пользователей</h2>
-            {% if user_types_chart %}
+    <section>
+        <h2>Типы пользователей</h2>
+        {% if user_types_chart %}
+            <figure>
                 <img src="{{ user_types_chart }}" alt="Круговая диаграмма типов пользователей">
-            {% else %}
-                <p>Нет данных для отображения диаграммы типов пользователей.</p>
-            {% endif %}
-        </section>
+                <figcaption>Распределение ролей пользователей</figcaption>
+            </figure>
+        {% else %}
+            <p>Нет данных для отображения диаграммы типов пользователей.</p>
+        {% endif %}
+    </section>
 
-        <section>
-            <h2>Распределение возрастов (Водители и Клиенты)</h2>
-            {% if ages_histogram_chart %}
+    <section>
+        <h2>Распределение возрастов (Водители и Клиенты)</h2>
+        {% if ages_histogram_chart %}
+            <figure>
                 <img src="{{ ages_histogram_chart }}" alt="Гистограмма распределения возрастов">
-            {% else %}
-                <p>Нет данных для отображения гистограммы возрастов (возможно, не указаны даты рождения или нет пользователей нужных типов).</p>
-            {% endif %}
-        </section>
-    </div>
-</div>
+                <figcaption>Гистограмма возрастов пользователей</figcaption>
+            </figure>
+        {% else %}
+            <p>Нет данных для отображения гистограммы возрастов (возможно, не указаны даты рождения или нет пользователей нужных типов).</p>
+        {% endif %}
+    </section>
+</section>
 {% endblock %}

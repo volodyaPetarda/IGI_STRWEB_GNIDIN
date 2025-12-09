@@ -4,41 +4,45 @@
 
 {% block head_extra %}
     {{ block.super }}
-
 {% endblock %}
 
 {% block content %}
-<div>
-    <h1>Уголок Развлечений</h1>
+<section aria-labelledby="fun-title">
+    <h1 id="fun-title">Уголок Развлечений</h1>
 
-    {% if error_message_pet %}
-
-        <p><strong>Проблема с питомцем:</strong> {{ error_message_pet }}</p>
+    {% if error_message_pet or error_message_fact %}
+        <aside aria-live="polite">
+            {% if error_message_pet %}
+                <p><strong>Проблема с питомцем:</strong> {{ error_message_pet }}</p>
+            {% endif %}
+            {% if error_message_fact %}
+                <p><strong>Проблема с фактом:</strong> {{ error_message_fact }}</p>
+            {% endif %}
+        </aside>
     {% endif %}
-    {% if error_message_fact %}
-        <p><strong>Проблема с фактом:</strong> {{ error_message_fact }}</p>
-    {% endif %}
 
-    <div>
+    <figure>
         {% if pet_image_url %}
             <img src="{{ pet_image_url }}" alt="Случайная зверушка">
+            <figcaption>Случайный питомец</figcaption>
         {% else %}
             {% if not error_message_pet %}
-            <p>Изображение питомца загружается...</p>
+                <figcaption>Изображение питомца загружается...</figcaption>
             {% endif %}
         {% endif %}
-    </div>
+    </figure>
 
-    <div>
+    <section aria-labelledby="fact-title">
+        <h2 id="fact-title">Случайный факт</h2>
         {% if fact_text %}
-            <p>{{ fact_text }}</p>
+            <p><q>{{ fact_text }}</q></p>
         {% else %}
-             {% if not error_message_fact %}
-            <p>Факт загружается...</p>
+            {% if not error_message_fact %}
+                <p>Факт загружается...</p>
             {% endif %}
         {% endif %}
-    </div>
+    </section>
 
-    <a href="{% url 'random_fact_pet' %}">Удиви меня еще!</a>
-</div>
+    <p><a href="{% url 'random_fact_pet' %}" role="button">Удиви меня еще!</a></p>
+</section>
 {% endblock %}

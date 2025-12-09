@@ -1,0 +1,59 @@
+{% extends "logistics/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section aria-labelledby="cart-title">
+    <h1 id="cart-title">{{ title }}</h1>
+
+    {% if cart_items %}
+        <ul>
+            {% for item in cart_items %}
+                <li>
+                    <article>
+                        <header>
+                            <strong>Заказ #{{ item.order.id }}</strong>
+                            {% if item.order.service %} — {{ item.order.service.name }}{% endif %}
+                        </header>
+                        <p>
+                            Цена: <data value="{{ item.order.total_cost }}">{{ item.order.total_cost }}</data> руб. ×
+                            <strong>{{ item.qty }}</strong> =
+                            <strong><data value="{{ item.line_total }}">{{ item.line_total }}</data></strong> руб.
+                        </p>
+                        <div style="margin-top:8px;">
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="order_id" value="{{ item.order.id }}">
+                                <button type="submit" name="action" value="dec">Уменьшить</button>
+                            </form>
+                            <form method="post" style="display:inline; margin-left:6px;">
+                                {% csrf_token %}
+                                <input type="hidden" name="order_id" value="{{ item.order.id }}">
+                                <button type="submit" name="action" value="inc">Увеличить</button>
+                            </form>
+                            <form method="post" style="display:inline; margin-left:6px;">
+                                {% csrf_token %}
+                                <input type="hidden" name="order_id" value="{{ item.order.id }}">
+                                <button type="submit" name="action" value="remove">Удалить</button>
+                            </form>
+                        </div>
+                    </article>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <p><strong><mark>Промежуточный итог:</mark></strong> <strong><data value="{{ cart_subtotal }}">{{ cart_subtotal }}</data></strong> руб.</p>
+
+        <div>
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" name="action" value="clear">Очистить корзину</button>
+            </form>
+            <a href="{% url 'payment' %}" style="margin-left:12px;">Перейти к оплате</a>
+        </div>
+    {% else %}
+        <p>Ваша корзина пуста.</p>
+        <p><a href="{% url 'create_order' %}">Создать новый заказ</a></p>
+    {% endif %}
+</section>
+{% endblock %}

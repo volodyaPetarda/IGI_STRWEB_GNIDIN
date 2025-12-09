@@ -1,0 +1,61 @@
+/* Page: Contacts */
+
+/* Base styling for the section */
+#contacts-section {
+	padding: var(--space-5);
+	border-radius: var(--radius-md);
+	transition: background-color .2s ease, color .2s ease;
+	background: rgba(255,255,255,0.04); /* default; will change with width */
+}
+
+#contacts-section h1,
+#contacts-section p,
+#contacts-section li,
+#contacts-section address,
+#contacts-section small { transition: color .2s ease; }
+
+/* Width-based background color changes */
+/* Small screens: <= 480px */
+@media (max-width: 480px) {
+	#contacts-section { background: #263238; /* blue-grey 900 */ }
+}
+
+/* Medium screens: 481px - 992px */
+@media (min-width: 481px) and (max-width: 992px) {
+	#contacts-section { background: #37474F; /* blue-grey 800 */ }
+}
+
+/* Large screens: >= 993px */
+@media (min-width: 993px) {
+	#contacts-section { background: #455A64; /* blue-grey 700 */ }
+}
+
+/* Height-based text color changes */
+/* Short viewports: <= 600px height */
+@media (max-height: 600px) {
+	#contacts-section, #contacts-section a { color: #FFEB3B; } /* yellow for compact height */
+}
+
+/* Medium height: 601px - 900px */
+@media (min-height: 601px) and (max-height: 900px) {
+	#contacts-section, #contacts-section a { color: #FFE082; } /* amber 200 */
+}
+
+/* Tall viewports: >= 901px */
+@media (min-height: 901px) {
+	#contacts-section, #contacts-section a { color: #FFFFFF; }
+}
+
+/* Optional: simple card layout for staff list */
+#contacts-section > ul { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+#contacts-section > ul > li article { background: rgba(0,0,0,.15); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-md); padding: var(--space-4); display: flex; gap: var(--space-3); align-items: flex-start; }
+#contacts-section > ul > li article .person-details { display: grid; gap: 6px; min-width: 0; }
+#contacts-section > ul > li article header { line-height: 1.3; }
+#contacts-section > ul > li article p { margin: 0; }
+#contacts-section > ul > li article address { font-style: normal; }
+#contacts-section a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Small screens: stack vertically */
+@media (max-width: 420px) {
+	#contacts-section > ul > li article { flex-direction: column; align-items: center; text-align: center; }
+}

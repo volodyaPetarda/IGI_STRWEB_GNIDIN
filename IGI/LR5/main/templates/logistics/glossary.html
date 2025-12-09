@@ -1,0 +1,38 @@
+{% extends 'logistics/base.html' %}
+{% load static %}
+
+{% block title %}Словарь и FAQ{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'main/css/pages/glossary.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+  <h1>Словарь терминов и часто задаваемые вопросы</h1>
+  <p class="subtitle">Найдите ответ, раскрыв интересующий вопрос. Указываем дату добавления для удобства.</p>
+</section>
+
+<section id="faq-list" class="faq-list" aria-label="Список вопросов и ответов">
+  {% if items %}
+    <ul class="faq-accordion" role="list">
+      {% for it in items %}
+        <li class="faq-item">
+          <details{% if forloop.first %} open{% endif %}>
+            <summary>
+              <span class="q">{{ it.question }}</span>
+              <time class="date" datetime="{{ it.added_at|date:'c' }}">{{ it.added_at|date:'d.m.Y' }}</time>
+              <span class="icon" aria-hidden="true"></span>
+            </summary>
+            <div class="answer" id="answer-{{ it.id }}">
+              <p>{{ it.answer|linebreaks }}</p>
+            </div>
+          </details>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Пока нет записей словаря или FAQ.</p>
+  {% endif %}
+</section>
+{% endblock %}
